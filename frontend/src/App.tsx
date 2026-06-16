@@ -93,6 +93,8 @@ const translateDetailKey = (key: string): string => {
 const IconSearch = () => <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px'}}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>;
 const IconStart = () => <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px'}}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
 const IconTarget = () => <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px'}}><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>;
+const IconShield = () => <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '5px'}}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>;
+const IconRefresh = () => <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px'}}><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>;
 
 function App() {
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
@@ -311,14 +313,14 @@ function App() {
     setPathNodes(new Set());
     setPathLinks(new Set());
   };
-
   if (loading) return <div className="loading">Ładowanie grafu...</div>;
 
   return (
     <div className="app-container">
-      <header className="header">
-        <div className="header-title">
-          <h1>🛡️ RPG Graph</h1>
+      <header className="app-header">
+        <div className="brand">
+          <IconShield />
+          RPG Graph
         </div>
         
         <div className="search-container">
@@ -345,7 +347,7 @@ function App() {
           style={{marginLeft: '15px', padding: '5px 15px'}}
           onClick={() => window.location.reload()}
         >
-          🔄 Resetuj Graf
+          <IconRefresh /> Resetuj Graf
         </button>
 
         <div className="legend">

@@ -43,6 +43,37 @@ Object.entries(svgStrings).forEach(([key, svg]) => {
   ICONS[key] = img;
 });
 
+// Słowniki tłumaczeń dla interfejsu użytkownika
+const translateLabel = (label: string): string => {
+  const dict: Record<string, string> = {
+    'Item': 'Przedmiot',
+    'Material': 'Materiał',
+    'Monster': 'Potwór',
+    'NPC': 'Postać (NPC)',
+    'Zone': 'Strefa',
+    'Quest': 'Zadanie',
+    'Skill': 'Umiejętność'
+  };
+  return dict[label] || label;
+};
+
+const translateRelation = (type: string): string => {
+  const dict: Record<string, string> = {
+    'RESIDES_IN': 'Zamieszkuje',
+    'SPAWNS_IN': 'Pojawia się w',
+    'GIVES': 'Zleca',
+    'TAKES_PLACE_IN': 'Odbywa się w',
+    'PRE_REQUISITE': 'Wymaga',
+    'REQUIRES': 'Potrzebuje',
+    'DROPS': 'Upuszcza',
+    'UNLOCKS': 'Odblokowuje',
+    'TEACHES': 'Uczy',
+    'GRANTS_SKILL': 'Daje umiejętność',
+    'USES_SKILL': 'Używa'
+  };
+  return dict[type] || type;
+};
+
 function App() {
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
   const [loading, setLoading] = useState(true);
@@ -304,7 +335,7 @@ function App() {
                 style={{ width: '16px', height: '16px', display: 'inline-block' }} 
                 dangerouslySetInnerHTML={{ __html: svg.replace('fill="white"', `fill="${getNodeColor({ label } as Node)}"`) }} 
               />
-              {label}
+              {translateLabel(label)}
             </span>
           ))}
         </div>
@@ -328,9 +359,9 @@ function App() {
               const tid = typeof link.target === 'object' ? link.target.id : link.target;
               return pathLinks.has(`${sid}-${link.type}-${tid}`) ? 3 : 1;
             }}
-            linkDirectionalArrowLength={5}
+            linkDirectionalArrowLength={3.5}
             linkDirectionalArrowRelPos={1}
-            linkLabel={(link: any) => link.type}
+            linkLabel={(link: any) => translateRelation(link.type)}
             onNodeClick={handleNodeClick}
             nodeCanvasObjectMode={() => 'replace'}
             nodeCanvasObject={(node, ctx, globalScale) => {
@@ -387,7 +418,7 @@ function App() {
               <>
                 <h2>{selectedNode.name || selectedNode.title || 'Nieznany Obiekt'}</h2>
                 <span className="badge" style={{backgroundColor: getNodeColor(selectedNode)}}>
-                  {selectedNode.label}
+                  {translateLabel(selectedNode.label as string)}
                 </span>
                 
                 <div className="details-list">

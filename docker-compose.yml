@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  neo4j:
+    image: neo4j:5
+    container_name: neo4j-rpg
+    ports:
+      - "7474:7474" # Interfejs przeglądarkowy (Neo4j Browser)
+      - "7687:7687" # Port protokołu Bolt (dla Pythona/FastAPI)
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+    environment:
+      - NEO4J_AUTH=neo4j/rpg-password123
+      # Automatycznie pobiera APOC - najpopularniejszą bibliotekę algorytmów dla Neo4j (bardzo punktowane na studiach!)
+      - NEO4J_PLUGINS=["apoc"] 
+    restart: unless-stopped
+

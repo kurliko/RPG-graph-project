@@ -28,6 +28,8 @@ function App() {
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
   const [loading, setLoading] = useState(true);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Node[]>([]);
   const fgRef = useRef<any>();
 
   // Inicjalne załadowanie grafu
@@ -96,14 +98,60 @@ function App() {
     fgRef.current.zoom(3, 2000);
   }, []);
 
+  const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const q = e.target.value;
+    setSearchQuery(q);
+    if (q.length > 1) {
+      try {
+        const res = await axios.get(`http://localhost:8000/api/search?q=${encodeURIComponent(q)}`);
+        setSearchResults(res.data.nodes);
+      } catch (error) {
+        console.error("Błąd wyszukiwania:", error);
+      }
+    } else {
+      setSearchResults([]);
+    }
+  };
+
+  const handleSelectSearchResult = (nodeId: string) => {
+    const foundNode = data.nodes.find(n => n.id === nodeId);
+    if (foundNode) {
+      handleNodeClick(foundNode);
+    } else {
+      alert("Aby wycentrować ten węzeł, rozszerz graf w jego pobliżu (brak go w obecnym widoku).");
+    }
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
   if (loading) return <div className="loading">Ładowanie grafu...</div>;
 
   return (
     <div className="app-container">
       <header className="header">
         <div className="header-title">
-          <h1>🛡️ RPG Graph: Mitologia Nordycka</h1>
+          <h1>🛡️ RPG Graph</h1>
         </div>
+        
+        <div className="search-container">
+          <input 
+            type="text" 
+            placeholder="Szukaj (np. Mjolnir)..." 
+            value={searchQuery}
+            onChange={handleSearch}
+            className="search-input"
+          />
+          {searchResults.length > 0 && (
+            <div className="search-results">
+              {searchResults.map(n => (
+                <div key={n.id} className="search-result-item" onClick={() => handleSelectSearchResult(n.id)}>
+                  {n.name || n.title || n.game_id} <span style={{fontSize: '0.7rem', color: '#8b949e'}}>({n.label})</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="legend">
           <span style={{color: '#FFD700'}}>● Item</span>
           <span style={{color: '#C0C0C0'}}>● Material</span>

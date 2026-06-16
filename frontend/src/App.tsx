@@ -24,6 +24,25 @@ interface GraphData {
   links: Link[];
 }
 
+const ICONS: Record<string, HTMLImageElement> = {};
+
+// Przygotowanie ikon SVG (kodowane do Base64 dla elementu Image w Canvas)
+const svgStrings: Record<string, string> = {
+  Item: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z"/></svg>',
+  Material: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M6 2L2 8L12 22L22 8L18 2H6ZM6.83 4H17.17L19.5 7.5H4.5L6.83 4ZM12 19L5.45 9.5H18.55L12 19Z"/></svg>',
+  Monster: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM8 11C7.45 11 7 10.55 7 10C7 9.45 7.45 9 8 9C8.55 9 9 9.45 9 10C9 10.55 8.55 11 8 11ZM16 11C15.45 11 15 10.55 15 10C15 9.45 15.45 9 16 9C16.55 9 17 9.45 17 10C17 10.55 16.55 11 16 11ZM12 18C9.5 18 7.45 16.27 6.88 14H17.12C16.55 16.27 14.5 18 12 18Z"/></svg>',
+  NPC: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/></svg>',
+  Zone: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M14 6L10 4V16L14 18M14 6V18M14 6L21 4V16L14 18M10 4L3 6V18L10 16M10 4V16"/></svg>',
+  Quest: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M11 15H13V17H11V15ZM11 7H13V13H11V7ZM12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z"/></svg>',
+  Skill: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M7 2V13H10V22L17 10H13L17 2H7Z"/></svg>'
+};
+
+Object.entries(svgStrings).forEach(([key, svg]) => {
+  const img = new Image();
+  img.src = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  ICONS[key] = img;
+});
+
 function App() {
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
   const [loading, setLoading] = useState(true);
@@ -99,6 +118,7 @@ function App() {
       case 'NPC': return '#1E90FF';
       case 'Zone': return '#32CD32';
       case 'Quest': return '#9370DB';
+      case 'Skill': return '#FF1493';
       default: return '#A9A9A9';
     }
   };
@@ -260,22 +280,33 @@ function App() {
             linkDirectionalArrowRelPos={1}
             linkLabel={(link: any) => link.type}
             onNodeClick={handleNodeClick}
-            // Zaznaczanie klikniętego węzła
-            nodeCanvasObjectMode={node => (node.id === selectedNode?.id || pathNodes.has(node.id as string)) ? 'before' : undefined}
-            nodeCanvasObject={(node, ctx) => {
-              if (node.x && node.y) {
-                if (node.id === selectedNode?.id) {
-                  ctx.beginPath();
-                  ctx.arc(node.x, node.y, 12, 0, 2 * Math.PI, false);
-                  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                  ctx.fill();
-                }
-                if (pathNodes.has(node.id as string)) {
-                  ctx.beginPath();
-                  ctx.arc(node.x, node.y, 14, 0, 2 * Math.PI, false);
-                  ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
-                  ctx.fill();
-                }
+            nodeCanvasObjectMode={() => 'replace'}
+            nodeCanvasObject={(node, ctx, globalScale) => {
+              if (node.x === undefined || node.y === undefined) return;
+              
+              const isSelected = node.id === selectedNode?.id;
+              const isPath = pathNodes.has(node.id as string);
+              const size = 6;
+              
+              // Podświetlenie dla selekcji lub ścieżki
+              if (isSelected || isPath) {
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, size + 4, 0, 2 * Math.PI, false);
+                ctx.fillStyle = isSelected ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 215, 0, 0.4)';
+                ctx.fill();
+              }
+
+              // Rysowanie kółka węzła
+              ctx.beginPath();
+              ctx.arc(node.x, node.y, size, 0, 2 * Math.PI, false);
+              ctx.fillStyle = getNodeColor(node as Node);
+              ctx.fill();
+
+              // Rysowanie ikony SVG
+              const img = ICONS[(node as Node).label];
+              if (img) {
+                const imgSize = size * 1.3; // Ikona dopasowana wielkością do kółka
+                ctx.drawImage(img, node.x - imgSize/2, node.y - imgSize/2, imgSize, imgSize);
               }
             }}
           />

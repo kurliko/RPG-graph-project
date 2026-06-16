@@ -76,35 +76,16 @@ function App() {
       const res = await axios.get(`http://localhost:8000/api/nodes/${encodeURIComponent(selectedNode.id)}/expand`);
       const { nodes: newNodes, links: newLinks } = res.data;
       
-      setData((prevData) => {
-        // Unikanie duplikatów i zachowanie starych referencji (nie nadpisujemy węzłów, które już mają pozycje X, Y z d3-force)
-        const nodeMap = new Map(prevData.nodes.map(n => [n.id, n]));
-        newNodes.forEach((n: Node) => {
-          if (!nodeMap.has(n.id)) {
-            nodeMap.set(n.id, n);
-          }
-        });
-        
-        const linkMap = new Map(prevData.links.map(l => {
-          const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
-          const targetId = typeof l.target === 'object' ? l.target.id : l.target;
-          return [`${sourceId}-${l.type}-${targetId}`, l];
-        }));
-        
-        newLinks.forEach((l: Link) => {
-          const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
-          const targetId = typeof l.target === 'object' ? l.target.id : l.target;
-          const key = `${sourceId}-${l.type}-${targetId}`;
-          if (!linkMap.has(key)) {
-            linkMap.set(key, l);
-          }
-        });
-
-        return {
-          nodes: Array.from(nodeMap.values()),
-          links: Array.from(linkMap.values())
-        };
+      setData({
+        nodes: newNodes,
+        links: newLinks
       });
+      
+      // Możemy też wycentrować graf ponownie, żeby się ładnie ułożył
+      setTimeout(() => {
+        fgRef.current.zoomToFit(1000, 50);
+      }, 300);
+      
     } catch (error) {
       console.error("Błąd podczas rozszerzania węzła:", error);
     }
@@ -236,6 +217,14 @@ function App() {
             </div>
           )}
         </div>
+        
+        <button 
+          className="action-button close-btn" 
+          style={{marginLeft: '15px', padding: '5px 15px'}}
+          onClick={() => window.location.reload()}
+        >
+          🔄 Resetuj Graf
+        </button>
 
         <div className="legend">
           {Object.entries(svgStrings).map(([label, svg]) => (

@@ -112,6 +112,7 @@ function App() {
   const [pathTarget, setPathTarget] = useState<Node | null>(null);
   const [pathNodes, setPathNodes] = useState<Set<string>>(new Set());
   const [pathLinks, setPathLinks] = useState<Set<string>>(new Set());
+  const [recommendedEquipment, setRecommendedEquipment] = useState<Node[]>([]);
   
   // Referencje do śledzenia podwójnego kliknięcia i efektów poświaty
   const fgRef = useRef<any>();
@@ -244,6 +245,9 @@ function App() {
       // Pojedyncze kliknięcie
       lastClickedNode.current = node.id as string;
       clickTimeout.current = setTimeout(() => {
+        if (selectedNode?.id !== node.id) {
+          setRecommendedEquipment([]); // Wyczyść rekomendacje przy zmianie węzła
+        }
         setSelectedNode(node);
         fgRef.current.centerAt(node.x, node.y, 1000);
         fgRef.current.zoom(3, 2000);
@@ -344,6 +348,9 @@ function App() {
         alert("Brak danych o słabościach i rekomendacjach dla tego potwora.");
         return;
       }
+      
+      const itemsAndSkills = newNodes.filter((n: any) => n.label === 'Item' || n.label === 'Skill');
+      setRecommendedEquipment(itemsAndSkills);
       
       const newAddedIds = new Set<string>();
 
@@ -485,6 +492,7 @@ function App() {
               
               const isSelected = node.id === selectedNode?.id;
               const isPath = pathNodes.has(node.id as string);
+              const isRecommended = recommendedEquipment.some(r => r.id === node.id);
               const highlight = highlightsRef.current.find(h => h.id === node.id);
               const size = 6;
               
@@ -510,12 +518,28 @@ function App() {
                 ctx.fillStyle = isSelected ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 215, 0, 0.4)';
                 ctx.fill();
               }
+              
+              // Czerwono-Złoty krąg oznaczający rekomendowany sprzęt na potwora
+              if (isRecommended) {
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, size + 8, 0, 2 * Math.PI, false);
+                ctx.strokeStyle = '#D4AF37'; // Nordyckie złoto
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                
+                // Poświata
+                ctx.shadowColor = '#FF4500'; // Ognista czerwień
+                ctx.shadowBlur = 15;
+              }
 
               // Rysowanie kółka węzła
               ctx.beginPath();
               ctx.arc(node.x, node.y, size, 0, 2 * Math.PI, false);
               ctx.fillStyle = getNodeColor(node as Node);
               ctx.fill();
+              
+              // Reset shadowBlur po narysowaniu tła węzła, żeby ikona SVG nie była rozmazana
+              ctx.shadowBlur = 0;
 
               // Rysowanie ikony SVG
               const img = ICONS[(node as Node).label];
@@ -558,6 +582,21 @@ function App() {
                   <button className="action-button" style={{backgroundColor: '#4a1515', color: '#ffb3b3', marginTop: '10px'}} onClick={handleRecommend}>
                     ⚔️ Znajdź wyposażenie na potwora
                   </button>
+                )}
+                
+                {recommendedEquipment.length > 0 && (
+                  <div style={{ marginTop: '15px', border: '1px solid #d4af37', padding: '15px', borderRadius: '8px', backgroundColor: 'rgba(212, 175, 55, 0.05)' }}>
+                    <h4 style={{ color: '#d4af37', margin: '0 0 12px 0', fontFamily: 'Cinzel Decorative', letterSpacing: '1px' }}>Zalecany Ekwipunek:</h4>
+                    {recommendedEquipment.map(item => (
+                      <div key={item.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px dotted rgba(212, 175, 55, 0.3)' }}>
+                        <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>⚔️</span>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ color: '#e8e4c9', fontWeight: 600, fontSize: '0.95rem' }}>{item.name || item.title}</span>
+                          <span style={{ color: '#a3c9a8', fontSize: '0.75rem', textTransform: 'uppercase' }}>{translateLabel(item.label as string)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </>
             ) : (
@@ -613,7 +652,7 @@ function App() {
             <button 
               className="action-button close-btn" 
               style={{marginTop: 'auto'}} 
-              onClick={() => { setSelectedNode(null); clearPath(); }}
+              onClick={() => { setSelectedNode(null); clearPath(); setRecommendedEquipment([]); }}
             >
               Zamknij cały panel
             </button>

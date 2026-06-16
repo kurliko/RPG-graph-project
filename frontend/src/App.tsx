@@ -50,7 +50,7 @@ const translateLabel = (label: string): string => {
     'Material': 'Materiał',
     'Monster': 'Potwór',
     'NPC': 'Postać (NPC)',
-    'Zone': 'Strefa',
+    'Zone': 'Lokalizacja',
     'Quest': 'Zadanie',
     'Skill': 'Umiejętność'
   };
@@ -367,7 +367,7 @@ function App() {
           <ForceGraph2D
             ref={fgRef}
             graphData={data}
-            nodeLabel={(node: any) => `${node.label}: ${node.name || node.title || node.game_id}`}
+            nodeLabel={(node: any) => `${translateLabel(node.label)}: ${node.name || node.title || node.game_id || 'Nieznany'}`}
             nodeColor={(node: any) => getNodeColor(node)}
             nodeRelSize={7}
             linkColor={(link: any) => {

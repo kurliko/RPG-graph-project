@@ -456,7 +456,7 @@ function App() {
                 
                 <div className="details-list">
                   {Object.entries(selectedNode)
-                    .filter(([key]) => !key.startsWith('_') && !key.startsWith('F') && !['id', 'x', 'y', 'vx', 'vy', 'index', 'name', 'title', 'label', 'game_id'].includes(key))
+                    .filter(([key]) => !key.startsWith('_') && !['id', 'x', 'y', 'vx', 'vy', 'fx', 'fy', 'index', 'name', 'title', 'label', 'game_id'].includes(key))
                     .map(([key, value]) => (
                       <div className="detail-item" key={key}>
                         <span className="detail-key">{translateDetailKey(key)}:</span>

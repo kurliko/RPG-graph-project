@@ -58,9 +58,13 @@ function App() {
       const { nodes: newNodes, links: newLinks } = res.data;
       
       setData((prevData) => {
-        // Unikanie duplikatów
+        // Unikanie duplikatów i zachowanie starych referencji (nie nadpisujemy węzłów, które już mają pozycje X, Y z d3-force)
         const nodeMap = new Map(prevData.nodes.map(n => [n.id, n]));
-        newNodes.forEach((n: Node) => nodeMap.set(n.id, n));
+        newNodes.forEach((n: Node) => {
+          if (!nodeMap.has(n.id)) {
+            nodeMap.set(n.id, n);
+          }
+        });
         
         const linkMap = new Map(prevData.links.map(l => {
           const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
@@ -71,7 +75,10 @@ function App() {
         newLinks.forEach((l: Link) => {
           const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
           const targetId = typeof l.target === 'object' ? l.target.id : l.target;
-          linkMap.set(`${sourceId}-${l.type}-${targetId}`, l);
+          const key = `${sourceId}-${l.type}-${targetId}`;
+          if (!linkMap.has(key)) {
+            linkMap.set(key, l);
+          }
         });
 
         return {
@@ -147,7 +154,11 @@ function App() {
       // Dodajemy do głównego grafu jeśli węzły lub relacje są nowe
       setData((prevData) => {
         const nodeMap = new Map(prevData.nodes.map(n => [n.id, n]));
-        res.data.nodes.forEach((n: Node) => nodeMap.set(n.id, n));
+        res.data.nodes.forEach((n: Node) => {
+          if (!nodeMap.has(n.id)) {
+            nodeMap.set(n.id, n);
+          }
+        });
         
         const linkMap = new Map(prevData.links.map(l => {
           const s = typeof l.source === 'object' ? l.source.id : l.source;
@@ -158,7 +169,10 @@ function App() {
         res.data.links.forEach((l: Link) => {
           const s = typeof l.source === 'object' ? l.source.id : l.source;
           const t = typeof l.target === 'object' ? l.target.id : l.target;
-          linkMap.set(`${s}-${l.type}-${t}`, l);
+          const key = `${s}-${l.type}-${t}`;
+          if (!linkMap.has(key)) {
+            linkMap.set(key, l);
+          }
         });
         return { nodes: Array.from(nodeMap.values()), links: Array.from(linkMap.values()) };
       });

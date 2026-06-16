@@ -88,10 +88,10 @@ const translateDetailKey = (key: string): string => {
     'faction': 'Frakcja',
     'category': 'Kategoria',
     'rarity': 'Rzadkość',
-    'exp_reward': 'Nagroda (EXP)',
-    'cooldown': 'Czas odnowienia',
-    'weight': 'Waga',
-    'type': 'Typ'
+    'exp_reward': 'Nagroda EXP',
+    'weaknesses': 'Wrażliwość',
+    'resistances': 'Odporność',
+    'cooldown': 'Czas Odnowienia'
   };
   return dict[key] || key;
 };
@@ -244,18 +244,32 @@ function App() {
     } else {
       // Pojedyncze kliknięcie
       lastClickedNode.current = node.id as string;
-      clickTimeout.current = setTimeout(() => {
+      clickTimeout.current = setTimeout(async () => {
         if (selectedNode?.id !== node.id) {
           setRecommendedEquipment([]); // Wyczyść rekomendacje przy zmianie węzła
         }
-        setSelectedNode(node);
-        fgRef.current.centerAt(node.x, node.y, 1000);
+        
+        let nodeData = { ...node };
+        
+        // Jeśli kliknięto potwora, dynamicznie dociągamy jego słabości i odporności
+        if (node.label === 'Monster') {
+          try {
+            const res = await axios.get(`http://localhost:8000/api/nodes/${encodeURIComponent(node.id as string)}/details`);
+            if (res.data.weaknesses) nodeData.weaknesses = res.data.weaknesses;
+            if (res.data.resistances) nodeData.resistances = res.data.resistances;
+          } catch(e) {
+            console.error("Błąd podczas pobierania detali węzła", e);
+          }
+        }
+        
+        setSelectedNode(nodeData);
+        fgRef.current.centerAt(nodeData.x, nodeData.y, 1000);
         fgRef.current.zoom(3, 2000);
         clickTimeout.current = null;
         lastClickedNode.current = null;
       }, 400); // 400ms okienko na łatwiejsze wykonanie podwójnego kliknięcia
     }
-  }, []);
+  }, [selectedNode]);
 
   const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const q = e.target.value;

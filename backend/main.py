@@ -251,3 +251,22 @@ def recommend_equipment(monster_id: str):
         "nodes": list(nodes_dict.values()),
         "links": list(unique_links.values())
     }
+
+@app.get("/api/nodes/{node_id}/details")
+def get_node_details(node_id: str):
+    query = """
+    MATCH (n) WHERE elementId(n) = $node_id
+    OPTIONAL MATCH (n)-[:WEAK_AGAINST]->(w:Element)
+    OPTIONAL MATCH (n)-[:RESISTANT_TO]->(r:Element)
+    RETURN 
+        [x IN collect(DISTINCT w.name) WHERE x IS NOT NULL] as weaknesses,
+        [x IN collect(DISTINCT r.name) WHERE x IS NOT NULL] as resistances
+    """
+    results = db.query(query, parameters={"node_id": node_id})
+    if results and len(results) > 0:
+        record = results[0]
+        return {
+            "weaknesses": ", ".join(record["weaknesses"]) if record["weaknesses"] else "",
+            "resistances": ", ".join(record["resistances"]) if record["resistances"] else ""
+        }
+    return {"weaknesses": "", "resistances": ""}

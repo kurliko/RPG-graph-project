@@ -90,6 +90,10 @@ const translateDetailKey = (key: string): string => {
   return dict[key] || key;
 };
 
+const IconSearch = () => <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px'}}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>;
+const IconStart = () => <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px'}}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
+const IconTarget = () => <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px'}}><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>;
+
 function App() {
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
   const [loading, setLoading] = useState(true);
@@ -449,10 +453,10 @@ function App() {
                 </div>
 
                 <button className="action-button expand-btn" onClick={handleExpandNode}>
-                  🔍 Eksploruj powiązania
+                  <IconSearch /> Eksploruj powiązania
                 </button>
                 <button className="action-button expand-btn" onClick={() => handleDoubleClickExpand(selectedNode)}>
-                  🔍 Wyizoluj sąsiadów
+                  <IconSearch /> Wyizoluj sąsiadów
                 </button>
               </>
             ) : (
@@ -474,7 +478,7 @@ function App() {
                   disabled={!selectedNode}
                   style={{flex: 1, opacity: selectedNode ? 1 : 0.5}}
                 >
-                  📍 Ustaw Start
+                  <IconStart /> Ustaw Start
                 </button>
                 <button 
                   className="action-button path-btn" 
@@ -482,12 +486,12 @@ function App() {
                   disabled={!selectedNode}
                   style={{flex: 1, opacity: selectedNode ? 1 : 0.5}}
                 >
-                  🎯 Ustaw Cel
+                  <IconTarget /> Ustaw Cel
                 </button>
               </div>
 
-              <p style={{ margin: '5px 0', fontSize: '0.9rem' }}>📍 Start: <strong style={{color: '#fff'}}>{pathSource ? (pathSource.name || pathSource.title || pathSource.game_id) : '---'}</strong></p>
-              <p style={{ margin: '5px 0', fontSize: '0.9rem' }}>🎯 Cel: <strong style={{color: '#fff'}}>{pathTarget ? (pathTarget.name || pathTarget.title || pathTarget.game_id) : '---'}</strong></p>
+              <p style={{ margin: '5px 0', fontSize: '0.9rem' }}><IconStart /> Start: <strong style={{color: '#fff'}}>{pathSource ? (pathSource.name || pathSource.title || pathSource.game_id) : '---'}</strong></p>
+              <p style={{ margin: '5px 0', fontSize: '0.9rem' }}><IconTarget /> Cel: <strong style={{color: '#fff'}}>{pathTarget ? (pathTarget.name || pathTarget.title || pathTarget.game_id) : '---'}</strong></p>
               
               <button 
                 onClick={handleFindPath} 

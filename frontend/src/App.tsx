@@ -207,6 +207,18 @@ function App() {
         setTimeout(() => {
            highlightsRef.current = highlightsRef.current.filter(h => Date.now() - h.timestamp < 3000);
         }, 3000);
+      } else {
+        // Dajmy feedback nawet jeśli nie pobrano nowych węzłów (podświetl sam węzeł główny)
+        const now = Date.now();
+        highlightsRef.current = [...highlightsRef.current, { id: node.id, timestamp: now }];
+        setTimeout(() => {
+           highlightsRef.current = highlightsRef.current.filter(h => Date.now() - h.timestamp < 3000);
+        }, 3000);
+      }
+      
+      // Wymuś podgrzanie symulacji, by klatki animacji poświaty nie zamarzały
+      if (fgRef.current) {
+        fgRef.current.d3ReheatSimulation();
       }
       
     } catch (error) {
@@ -230,7 +242,7 @@ function App() {
         fgRef.current.zoom(3, 2000);
         clickTimeout.current = null;
         lastClickedNode.current = null;
-      }, 250); // 250ms okienko na podwójne kliknięcie
+      }, 400); // 400ms okienko na łatwiejsze wykonanie podwójnego kliknięcia
     }
   }, []);
 

@@ -178,38 +178,41 @@ function App() {
       const { nodes: newNodes, links: newLinks } = res.data;
       
       const newAddedIds = new Set<string>();
+      const nodeMap = new Map(data.nodes.map(n => [n.id, n]));
+      const combinedNodes = [...data.nodes];
+      
+      newNodes.forEach((n: Node) => {
+        if (!nodeMap.has(n.id)) {
+          n.x = node.x !== undefined ? node.x + (Math.random() * 10 - 5) : 0;
+          n.y = node.y !== undefined ? node.y + (Math.random() * 10 - 5) : 0;
+          n.vx = 0;
+          n.vy = 0;
+          nodeMap.set(n.id, n);
+          newAddedIds.add(n.id as string);
+          combinedNodes.push(n);
+        }
+      });
+      
+      const linkMap = new Map(data.links.map(l => {
+        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+        return [`${sourceId}-${l.type}-${targetId}`, l];
+      }));
+      
+      const combinedLinks = [...data.links];
+      newLinks.forEach((l: Link) => {
+        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+        const key = `${sourceId}-${l.type}-${targetId}`;
+        if (!linkMap.has(key)) {
+          linkMap.set(key, l);
+          combinedLinks.push(l);
+        }
+      });
 
-      setData((prevData) => {
-        const nodeMap = new Map(prevData.nodes.map(n => [n.id, n]));
-        newNodes.forEach((n: Node) => {
-          if (!nodeMap.has(n.id)) {
-            // Inicjuj pozycję nowych węzłów blisko klikniętego ojca, by uniknąć ich gwałtownego przelotu przez ekran
-            n.x = node.x !== undefined ? node.x + (Math.random() * 10 - 5) : 0;
-            n.y = node.y !== undefined ? node.y + (Math.random() * 10 - 5) : 0;
-            nodeMap.set(n.id, n);
-            newAddedIds.add(n.id);
-          }
-        });
-        
-        const linkMap = new Map(prevData.links.map(l => {
-          const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
-          const targetId = typeof l.target === 'object' ? l.target.id : l.target;
-          return [`${sourceId}-${l.type}-${targetId}`, l];
-        }));
-        
-        newLinks.forEach((l: Link) => {
-          const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
-          const targetId = typeof l.target === 'object' ? l.target.id : l.target;
-          const key = `${sourceId}-${l.type}-${targetId}`;
-          if (!linkMap.has(key)) {
-            linkMap.set(key, l);
-          }
-        });
-
-        return {
-          nodes: Array.from(nodeMap.values()),
-          links: Array.from(linkMap.values())
-        };
+      setData({
+        nodes: combinedNodes,
+        links: combinedLinks
       });
 
       if (newAddedIds.size > 0) {
@@ -223,7 +226,7 @@ function App() {
       } else {
         // Dajmy feedback nawet jeśli nie pobrano nowych węzłów (podświetl sam węzeł główny)
         const now = Date.now();
-        highlightsRef.current = [...highlightsRef.current, { id: node.id, timestamp: now }];
+        highlightsRef.current = [...highlightsRef.current, { id: node.id as string, timestamp: now }];
         setTimeout(() => {
            highlightsRef.current = highlightsRef.current.filter(h => Date.now() - h.timestamp < 3000);
         }, 3000);
@@ -373,35 +376,41 @@ function App() {
       setRecommendedEquipment(itemsAndSkills);
       
       const newAddedIds = new Set<string>();
+      const nodeMap = new Map(data.nodes.map(n => [n.id, n]));
+      const combinedNodes = [...data.nodes];
 
-      setData((prevData) => {
-        const nodeMap = new Map(prevData.nodes.map(n => [n.id, n]));
-        newNodes.forEach((n: Node) => {
-          if (!nodeMap.has(n.id)) {
-            nodeMap.set(n.id, n);
-            newAddedIds.add(n.id);
-          }
-        });
-        
-        const linkMap = new Map(prevData.links.map(l => {
-          const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
-          const targetId = typeof l.target === 'object' ? l.target.id : l.target;
-          return [`${sourceId}-${l.type}-${targetId}`, l];
-        }));
-        
-        newLinks.forEach((l: Link) => {
-          const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
-          const targetId = typeof l.target === 'object' ? l.target.id : l.target;
-          const key = `${sourceId}-${l.type}-${targetId}`;
-          if (!linkMap.has(key)) {
-            linkMap.set(key, l);
-          }
-        });
+      newNodes.forEach((n: Node) => {
+        if (!nodeMap.has(n.id)) {
+          n.x = selectedNode.x !== undefined ? selectedNode.x + (Math.random() * 10 - 5) : 0;
+          n.y = selectedNode.y !== undefined ? selectedNode.y + (Math.random() * 10 - 5) : 0;
+          n.vx = 0;
+          n.vy = 0;
+          nodeMap.set(n.id, n);
+          newAddedIds.add(n.id as string);
+          combinedNodes.push(n);
+        }
+      });
+      
+      const linkMap = new Map(data.links.map(l => {
+        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+        return [`${sourceId}-${l.type}-${targetId}`, l];
+      }));
+      
+      const combinedLinks = [...data.links];
+      newLinks.forEach((l: Link) => {
+        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+        const key = `${sourceId}-${l.type}-${targetId}`;
+        if (!linkMap.has(key)) {
+          linkMap.set(key, l);
+          combinedLinks.push(l);
+        }
+      });
 
-        return {
-          nodes: Array.from(nodeMap.values()),
-          links: Array.from(linkMap.values())
-        };
+      setData({
+        nodes: combinedNodes,
+        links: combinedLinks
       });
 
       if (newAddedIds.size > 0) {
@@ -414,7 +423,7 @@ function App() {
         }, 3000);
       } else {
         const now = Date.now();
-        highlightsRef.current = [...highlightsRef.current, { id: selectedNode.id, timestamp: now }];
+        highlightsRef.current = [...highlightsRef.current, { id: selectedNode.id as string, timestamp: now }];
         setTimeout(() => {
            highlightsRef.current = highlightsRef.current.filter(h => Date.now() - h.timestamp < 3000);
         }, 3000);

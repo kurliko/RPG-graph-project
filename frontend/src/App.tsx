@@ -53,7 +53,12 @@ function App() {
   const [pathTarget, setPathTarget] = useState<Node | null>(null);
   const [pathNodes, setPathNodes] = useState<Set<string>>(new Set());
   const [pathLinks, setPathLinks] = useState<Set<string>>(new Set());
+  
+  // Referencje do śledzenia podwójnego kliknięcia i efektów poświaty
   const fgRef = useRef<any>();
+  const clickTimeout = useRef<any>(null);
+  const lastClickedNode = useRef<string | null>(null);
+  const highlightsRef = useRef<{id: string, timestamp: number}[]>([]);
 
   // Inicjalne załadowanie grafu
   useEffect(() => {
@@ -104,10 +109,76 @@ function App() {
     }
   };
 
+  const handleDoubleClickExpand = async (node: Node) => {
+    try {
+      const res = await axios.get(`http://localhost:8000/api/nodes/${encodeURIComponent(node.id)}/expand`);
+      const { nodes: newNodes, links: newLinks } = res.data;
+      
+      const newAddedIds = new Set<string>();
+
+      setData((prevData) => {
+        const nodeMap = new Map(prevData.nodes.map(n => [n.id, n]));
+        newNodes.forEach((n: Node) => {
+          if (!nodeMap.has(n.id)) {
+            nodeMap.set(n.id, n);
+            newAddedIds.add(n.id);
+          }
+        });
+        
+        const linkMap = new Map(prevData.links.map(l => {
+          const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+          const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+          return [`${sourceId}-${l.type}-${targetId}`, l];
+        }));
+        
+        newLinks.forEach((l: Link) => {
+          const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+          const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+          const key = `${sourceId}-${l.type}-${targetId}`;
+          if (!linkMap.has(key)) {
+            linkMap.set(key, l);
+          }
+        });
+
+        return {
+          nodes: Array.from(nodeMap.values()),
+          links: Array.from(linkMap.values())
+        };
+      });
+
+      if (newAddedIds.size > 0) {
+        const now = Date.now();
+        const newHighlights = Array.from(newAddedIds).map(id => ({ id, timestamp: now }));
+        highlightsRef.current = [...highlightsRef.current, ...newHighlights];
+        
+        setTimeout(() => {
+           highlightsRef.current = highlightsRef.current.filter(h => Date.now() - h.timestamp < 3000);
+        }, 3000);
+      }
+      
+    } catch (error) {
+      console.error("Błąd podczas rozszerzania węzła:", error);
+    }
+  };
+
   const handleNodeClick = useCallback((node: Node) => {
-    setSelectedNode(node);
-    fgRef.current.centerAt(node.x, node.y, 1000);
-    fgRef.current.zoom(3, 2000);
+    if (lastClickedNode.current === node.id && clickTimeout.current) {
+      // Wykryto podwójne kliknięcie
+      clearTimeout(clickTimeout.current);
+      clickTimeout.current = null;
+      lastClickedNode.current = null;
+      handleDoubleClickExpand(node);
+    } else {
+      // Pojedyncze kliknięcie
+      lastClickedNode.current = node.id as string;
+      clickTimeout.current = setTimeout(() => {
+        setSelectedNode(node);
+        fgRef.current.centerAt(node.x, node.y, 1000);
+        fgRef.current.zoom(3, 2000);
+        clickTimeout.current = null;
+        lastClickedNode.current = null;
+      }, 250); // 250ms okienko na podwójne kliknięcie
+    }
   }, []);
 
   const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -278,8 +349,24 @@ function App() {
               
               const isSelected = node.id === selectedNode?.id;
               const isPath = pathNodes.has(node.id as string);
+              const highlight = highlightsRef.current.find(h => h.id === node.id);
               const size = 6;
               
+              // Animacja poświaty dla nowo dodanych węzłów
+              if (highlight) {
+                const elapsed = Date.now() - highlight.timestamp;
+                const duration = 2500; // Poświata trwa 2.5 sekundy
+                if (elapsed < duration) {
+                  const progress = elapsed / duration;
+                  const alpha = 0.8 * (1 - progress); // Znika płynnie od 0.8 do 0
+                  const glowSize = size + 15 * (1 - progress); // Pulsuje z zewnątrz do wewnątrz
+                  ctx.beginPath();
+                  ctx.arc(node.x, node.y, glowSize, 0, 2 * Math.PI, false);
+                  ctx.fillStyle = `rgba(0, 255, 255, ${alpha})`;
+                  ctx.fill();
+                }
+              }
+
               // Podświetlenie dla selekcji lub ścieżki
               if (isSelected || isPath) {
                 ctx.beginPath();

@@ -183,6 +183,9 @@ function App() {
         const nodeMap = new Map(prevData.nodes.map(n => [n.id, n]));
         newNodes.forEach((n: Node) => {
           if (!nodeMap.has(n.id)) {
+            // Inicjuj pozycję nowych węzłów blisko klikniętego ojca, by uniknąć ich gwałtownego przelotu przez ekran
+            n.x = node.x !== undefined ? node.x + (Math.random() * 10 - 5) : 0;
+            n.y = node.y !== undefined ? node.y + (Math.random() * 10 - 5) : 0;
             nodeMap.set(n.id, n);
             newAddedIds.add(n.id);
           }
@@ -616,7 +619,7 @@ function App() {
                   </button>
                 )}
                 {selectedNode.label === 'Item' && (
-                  <button className="action-button" style={{backgroundColor: '#3a2800', color: '#d4af37', marginTop: '10px', border: '1px solid #d4af37'}} onClick={() => handleShowRecipe(selectedNode)}>
+                  <button className="action-button expand-btn" style={{backgroundColor: '#3a2800', color: '#d4af37', marginTop: '10px', border: '1px solid #d4af37'}} onClick={() => handleShowRecipe(selectedNode)}>
                     🛠️ Pokaż jak stworzyć (Przepis)
                   </button>
                 )}

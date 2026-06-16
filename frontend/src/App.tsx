@@ -404,15 +404,9 @@ function App() {
                 <button className="action-button expand-btn" onClick={handleExpandNode}>
                   🔍 Eksploruj powiązania
                 </button>
-                
-                <div style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
-                  <button className="action-button path-btn" onClick={() => setPathSource(selectedNode)} style={{flex: 1}}>
-                    📍 Ustaw Start
-                  </button>
-                  <button className="action-button path-btn" onClick={() => setPathTarget(selectedNode)} style={{flex: 1}}>
-                    🎯 Ustaw Cel
-                  </button>
-                </div>
+                <button className="action-button expand-btn" onClick={() => handleDoubleClickExpand(selectedNode)}>
+                  🔍 Wyizoluj sąsiadów
+                </button>
               </>
             ) : (
               <div style={{ color: '#8b949e', fontStyle: 'italic', marginBottom: '20px' }}>
@@ -424,9 +418,29 @@ function App() {
             
             {/* Sekcja Pathfindera w panelu bocznym */}
             <div>
-              <h3 style={{ color: '#FFD700', margin: '0 0 10px 0' }}>Ścieżka</h3>
-              <p style={{ margin: '5px 0', fontSize: '0.9rem' }}>📍 Start: {pathSource ? (pathSource.name || pathSource.title || pathSource.game_id) : '---'}</p>
-              <p style={{ margin: '5px 0', fontSize: '0.9rem' }}>🎯 Cel: {pathTarget ? (pathTarget.name || pathTarget.title || pathTarget.game_id) : '---'}</p>
+              <h3 style={{ color: '#FFD700', margin: '0 0 10px 0' }}>Narzędzie Ścieżki</h3>
+              
+              <div style={{display: 'flex', gap: '10px', marginBottom: '15px'}}>
+                <button 
+                  className="action-button path-btn" 
+                  onClick={() => selectedNode && setPathSource(selectedNode)} 
+                  disabled={!selectedNode}
+                  style={{flex: 1, opacity: selectedNode ? 1 : 0.5}}
+                >
+                  📍 Ustaw Start
+                </button>
+                <button 
+                  className="action-button path-btn" 
+                  onClick={() => selectedNode && setPathTarget(selectedNode)} 
+                  disabled={!selectedNode}
+                  style={{flex: 1, opacity: selectedNode ? 1 : 0.5}}
+                >
+                  🎯 Ustaw Cel
+                </button>
+              </div>
+
+              <p style={{ margin: '5px 0', fontSize: '0.9rem' }}>📍 Start: <strong style={{color: '#fff'}}>{pathSource ? (pathSource.name || pathSource.title || pathSource.game_id) : '---'}</strong></p>
+              <p style={{ margin: '5px 0', fontSize: '0.9rem' }}>🎯 Cel: <strong style={{color: '#fff'}}>{pathTarget ? (pathTarget.name || pathTarget.title || pathTarget.game_id) : '---'}</strong></p>
               
               <button 
                 onClick={handleFindPath} 

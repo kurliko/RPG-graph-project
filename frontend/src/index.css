@@ -226,17 +226,33 @@ body {
 }
 
 .action-button {
-  padding: 0.8rem;
-  border: none;
-  border-radius: 6px;
-  font-weight: bold;
+  position: relative;
+  background-color: #16241b;
+  background-clip: padding-box;
+  color: #e8e4c9;
+  padding: 6px 12px;
   cursor: pointer;
-  transition: opacity 0.2s;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: 'Cinzel Decorative', serif;
+  transition: all 0.2s ease;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  
+  /* Nordic Knotwork Frame */
+  border: 10px solid transparent;
+  border-image: url('data:image/svg+xml;utf8,<svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="28" height="28" fill="none" stroke="%232a3d32" stroke-width="1.5"/><rect x="5" y="5" width="20" height="20" fill="none" stroke="%23d4af37" stroke-width="1.5"/><path d="M5,5 L0,10 M25,5 L30,10 M5,25 L0,20 M25,25 L30,20" stroke="%23d4af37" stroke-width="1.5"/><path d="M5,5 L10,0 M25,5 L20,0 M5,25 L10,30 M25,25 L20,30" stroke="%23d4af37" stroke-width="1.5"/></svg>') 10 stretch;
 }
 
 .action-button:hover {
-  opacity: 0.8;
+  background-color: #1f3326;
+  border-image: url('data:image/svg+xml;utf8,<svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="28" height="28" fill="none" stroke="%234a7a63" stroke-width="1.5"/><rect x="5" y="5" width="20" height="20" fill="none" stroke="%23f2d675" stroke-width="1.5"/><path d="M5,5 L0,10 M25,5 L30,10 M5,25 L0,20 M25,25 L30,20" stroke="%23f2d675" stroke-width="1.5"/><path d="M5,5 L10,0 M25,5 L20,0 M5,25 L10,30 M25,25 L20,30" stroke="%23f2d675" stroke-width="1.5"/></svg>') 10 stretch;
+  text-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+  transform: translateY(-1px);
+}
+
+.action-button:active {
+  transform: translateY(1px);
 }
 
 .expand-btn {

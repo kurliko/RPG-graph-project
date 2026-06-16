@@ -34,7 +34,8 @@ const svgStrings: Record<string, string> = {
   NPC: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/></svg>',
   Zone: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M14 6L10 4V16L14 18M14 6V18M14 6L21 4V16L14 18M10 4L3 6V18L10 16M10 4V16"/></svg>',
   Quest: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M11 15H13V17H11V15ZM11 7H13V13H11V7ZM12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z"/></svg>',
-  Skill: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M7 2V13H10V22L17 10H13L17 2H7Z"/></svg>'
+  Skill: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M7 2V13H10V22L17 10H13L17 2H7Z"/></svg>',
+  Element: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>'
 };
 
 Object.entries(svgStrings).forEach(([key, svg]) => {
@@ -52,7 +53,8 @@ const translateLabel = (label: string): string => {
     'NPC': 'Postać (NPC)',
     'Zone': 'Lokalizacja',
     'Quest': 'Zadanie',
-    'Skill': 'Umiejętność'
+    'Skill': 'Umiejętność',
+    'Element': 'Żywioł'
   };
   return dict[label] || label;
 };
@@ -69,7 +71,11 @@ const translateRelation = (type: string): string => {
     'UNLOCKS': 'Odblokowuje',
     'TEACHES': 'Uczy',
     'GRANTS_SKILL': 'Daje umiejętność',
-    'USES_SKILL': 'Używa'
+    'USES_SKILL': 'Używa',
+    'WEAK_AGAINST': 'Wrażliwy na',
+    'RESISTANT_TO': 'Odporny na',
+    'IMBUED_WITH': 'Nasycony',
+    'USES_ELEMENT': 'Wykorzystuje'
   };
   return dict[type] || type;
 };
@@ -158,6 +164,7 @@ function App() {
       case 'Zone': return '#32CD32';
       case 'Quest': return '#9370DB';
       case 'Skill': return '#FF1493';
+      case 'Element': return node.color || '#00FFFF';
       default: return '#A9A9A9';
     }
   };
@@ -325,6 +332,80 @@ function App() {
     setPathNodes(new Set());
     setPathLinks(new Set());
   };
+
+  const handleRecommend = async () => {
+    if (!selectedNode || selectedNode.label !== 'Monster') return;
+    
+    try {
+      const res = await axios.get(`http://localhost:8000/api/recommend/${encodeURIComponent(selectedNode.id)}`);
+      const { nodes: newNodes, links: newLinks } = res.data;
+      
+      if (newNodes.length === 0) {
+        alert("Brak danych o słabościach i rekomendacjach dla tego potwora.");
+        return;
+      }
+      
+      const newAddedIds = new Set<string>();
+
+      setData((prevData) => {
+        const nodeMap = new Map(prevData.nodes.map(n => [n.id, n]));
+        newNodes.forEach((n: Node) => {
+          if (!nodeMap.has(n.id)) {
+            nodeMap.set(n.id, n);
+            newAddedIds.add(n.id);
+          }
+        });
+        
+        const linkMap = new Map(prevData.links.map(l => {
+          const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+          const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+          return [`${sourceId}-${l.type}-${targetId}`, l];
+        }));
+        
+        newLinks.forEach((l: Link) => {
+          const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+          const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+          const key = `${sourceId}-${l.type}-${targetId}`;
+          if (!linkMap.has(key)) {
+            linkMap.set(key, l);
+          }
+        });
+
+        return {
+          nodes: Array.from(nodeMap.values()),
+          links: Array.from(linkMap.values())
+        };
+      });
+
+      if (newAddedIds.size > 0) {
+        const now = Date.now();
+        const newHighlights = Array.from(newAddedIds).map(id => ({ id, timestamp: now }));
+        highlightsRef.current = [...highlightsRef.current, ...newHighlights];
+        
+        setTimeout(() => {
+           highlightsRef.current = highlightsRef.current.filter(h => Date.now() - h.timestamp < 3000);
+        }, 3000);
+      } else {
+        const now = Date.now();
+        highlightsRef.current = [...highlightsRef.current, { id: selectedNode.id, timestamp: now }];
+        setTimeout(() => {
+           highlightsRef.current = highlightsRef.current.filter(h => Date.now() - h.timestamp < 3000);
+        }, 3000);
+      }
+      
+      if (fgRef.current) {
+        fgRef.current.d3ReheatSimulation();
+        setTimeout(() => {
+            fgRef.current.zoomToFit(1000, 50);
+        }, 300);
+      }
+      
+    } catch (error) {
+      console.error("Błąd rekomendacji:", error);
+      alert("Wystąpił błąd podczas szukania rekomendacji.");
+    }
+  };
+
   if (loading) return <div className="loading">Ładowanie grafu...</div>;
 
   return (
@@ -471,6 +552,11 @@ function App() {
                 <button className="action-button expand-btn" onClick={() => handleDoubleClickExpand(selectedNode)}>
                   <IconSearch /> Wyizoluj sąsiadów
                 </button>
+                {selectedNode.label === 'Monster' && (
+                  <button className="action-button" style={{backgroundColor: '#4a1515', color: '#ffb3b3', marginTop: '10px'}} onClick={handleRecommend}>
+                    ⚔️ Znajdź wyposażenie na potwora
+                  </button>
+                )}
               </>
             ) : (
               <div style={{ color: '#8b949e', fontStyle: 'italic', marginBottom: '20px' }}>

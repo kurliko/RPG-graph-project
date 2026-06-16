@@ -185,7 +185,69 @@ def shortest_path(source: str, target: str):
                 **dict(r.items())
             })
             
+            
     return {
         "nodes": list(nodes_dict.values()),
         "links": links
+    }
+
+@app.get("/api/recommend/{monster_id}")
+def recommend_equipment(monster_id: str):
+    # Zapytanie rekomendujące ekwipunek: znajduje słabości potwora i dopasowuje bronie oraz umiejętności
+    query = """
+    MATCH (m)-[w:WEAK_AGAINST]->(e:Element)
+    WHERE elementId(m) = $monster_id
+    OPTIONAL MATCH (i:Item)-[r1:IMBUED_WITH]->(e)
+    OPTIONAL MATCH (s:Skill)-[r2:USES_ELEMENT]->(e)
+    RETURN m, w, e, i, r1, s, r2
+    LIMIT 100
+    """
+    
+    results = db.query(query, parameters={"monster_id": monster_id})
+    
+    nodes_dict = {}
+    links = []
+    
+    def serialize_node(node):
+        props = dict(node.items())
+        if 'id' in props:
+            props['game_id'] = props.pop('id')
+        return {
+            "id": node.element_id,
+            "label": list(node.labels)[0] if node.labels else "Unknown",
+            **props
+        }
+            
+    if results:
+        for record in results:
+            m = record['m']
+            e = record['e']
+            w = record['w']
+            i = record['i']
+            r1 = record['r1']
+            s = record['s']
+            r2 = record['r2']
+            
+            if m and m.element_id not in nodes_dict:
+                nodes_dict[m.element_id] = serialize_node(m)
+            if e and e.element_id not in nodes_dict:
+                nodes_dict[e.element_id] = serialize_node(e)
+            if w:
+                links.append({"source": w.nodes[0].element_id, "target": w.nodes[1].element_id, "type": w.type, **dict(w.items())})
+                
+            if i and i.element_id not in nodes_dict:
+                nodes_dict[i.element_id] = serialize_node(i)
+            if r1:
+                links.append({"source": r1.nodes[0].element_id, "target": r1.nodes[1].element_id, "type": r1.type, **dict(r1.items())})
+                
+            if s and s.element_id not in nodes_dict:
+                nodes_dict[s.element_id] = serialize_node(s)
+            if r2:
+                links.append({"source": r2.nodes[0].element_id, "target": r2.nodes[1].element_id, "type": r2.type, **dict(r2.items())})
+                
+    unique_links = {f"{l['source']}-{l['type']}-{l['target']}": l for l in links}
+    
+    return {
+        "nodes": list(nodes_dict.values()),
+        "links": list(unique_links.values())
     }

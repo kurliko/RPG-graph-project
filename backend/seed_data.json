@@ -1,0 +1,122 @@
+{
+  "nodes": [
+    { "id": "z1", "name": "Asgard", "type": "Zone", "details": "Kraina Asów, pod rządami Odyna. Wysoki próg wejścia.", "min_level": 40 },
+    { "id": "z2", "name": "Midgard", "type": "Zone", "details": "Świat ludzi, kraina startowa pełna podstawowych zadań.", "min_level": 1 },
+    { "id": "z3", "name": "Jotunheim", "type": "Zone", "details": "Mroźna, skalista kraina zamieszkana przez Lodowych Gigantów.", "min_level": 25 },
+    { "id": "z4", "name": "Niflheim", "type": "Zone", "details": "Kraina wiecznego lodu, mgły i najgroźniejszych potworów.", "min_level": 50 },
+    { "id": "z5", "name": "Nidavellir", "type": "Zone", "details": "Podziemny świat mistrzowskich kowali i karłów.", "min_level": 15 },
+    { "id": "z6", "name": "Muspelheim", "type": "Zone", "details": "Ognisty świat rządzony przez demona Surtra. Ekstremalne warunki.", "min_level": 45 },
+    { "id": "z7", "name": "Helheim", "type": "Zone", "details": "Kraina zmarłych, rządzona przez córkę Lokiego - Hel.", "min_level": 35 },
+    { "id": "z8", "name": "Alfheim", "type": "Zone", "details": "Świat świetlistych elfów, pełen magii i rzadkich ziół.", "min_level": 20 },
+    { "id": "z9", "name": "Vanaheim", "type": "Zone", "details": "Siedziba bogów z rodu Wanów, przepełniona naturą.", "min_level": 30 },
+
+    { "id": "n1", "name": "Odyn", "type": "NPC", "details": "Wszechojciec, skarbnik wiedzy, zleceniodawca zadań ostatecznych.", "faction": "Asowie" },
+    { "id": "n2", "name": "Thor", "type": "NPC", "details": "Gromowładny wojownik, oferuje zadania bojowe.", "faction": "Asowie" },
+    { "id": "n3", "name": "Freja", "type": "NPC", "details": "Bogini magii i płodności, uczy mistycznych run.", "faction": "Wanowie" },
+    { "id": "n4", "name": "Eitri", "type": "NPC", "details": "Legendarny karzeł, mistrz kowalstwa z Nidavelliru.", "faction": "Karły" },
+    { "id": "n5", "name": "Loki", "type": "NPC", "details": "Bóg oszustwa. Jego zadania często mają ukryte haczyki.", "faction": "Zmień-kształt" },
+    { "id": "n6", "name": "Heimdall", "type": "NPC", "details": "Strażnik mostu Bifrost, widzi i słyszy wszystko.", "faction": "Asowie" },
+
+    { "id": "m1", "name": "Fenrir", "type": "Monster", "details": "Potworny wilk, którego przeznaczeniem jest pożreć Odyna.", "level": 60 },
+    { "id": "m2", "name": "Jormungand", "type": "Monster", "details": "Wąż Świata, którego cielsko otacza Midgard.", "level": 55 },
+    { "id": "m3", "name": "Lodowy Gigant", "type": "Monster", "details": "Wojownik z Jotunheimu wrażliwy na ogień.", "level": 30 },
+    { "id": "m4", "name": "Surtr", "type": "Monster", "details": "Ognisty olbrzym dzierżący płonący miecz.", "level": 65 },
+    { "id": "m5", "name": "Nidhogg", "type": "Monster", "details": "Smok obgryzający korzenie drzewa Yggdrasil.", "level": 50 },
+
+    { "id": "mat1", "name": "Ruda Uru", "type": "Material", "details": "Magiczny, niezwykle ciężki metal absorbujący energię.", "category": "Metal" },
+    { "id": "mat2", "name": "Krew Ymira", "type": "Material", "details": "Prastary płyn esencjonalny o potężnej mocy kreacji.", "category": "Magiczny Płyn" },
+    { "id": "mat3", "name": "Skóra Jormunganda", "type": "Material", "details": "Nieprzebijalne łuski odporne na trucizny.", "category": "Skóra" },
+    { "id": "mat4", "name": "Gałąź Yggdrasila", "type": "Material", "details": "Święte drewno z Jesionu Świata.", "category": "Drewno" },
+    { "id": "mat5", "name": "Płomień Muspelheimu", "type": "Material", "details": "Wieczna iskra ognia zdolna stopić każdy metal.", "category": "Esencja" },
+
+    { "id": "i1", "name": "Mjolnir", "type": "Item", "details": "Legendarny młot Thora, zawsze wraca do rąk właściciela.", "rarity": "Legendarny" },
+    { "id": "i2", "name": "Gungnir", "type": "Item", "details": "Włócznia Odyna, która nigdy nie chybia celu.", "rarity": "Legendarny" },
+    { "id": "i3", "name": "Pas Megingjord", "type": "Item", "details": "Magiczny pas podwajający siłę użytkownika.", "rarity": "Epicki" },
+    { "id": "i4", "name": "Hofud", "type": "Item", "details": "Miecz Heimdalla, potrafiący czerpać moc z gwiazd.", "rarity": "Epicki" },
+    { "id": "i5", "name": "Topór Run", "type": "Item", "details": "Wojenne narzędzie pokryte ochronnymi znakami.", "rarity": "Rzadki" },
+    { "id": "i6", "name": "Płonący Miecz", "type": "Item", "details": "Ostrze przesiąknięte magią Muspelheimu.", "rarity": "Legendarny" },
+
+    { "id": "q1", "title": "Kuźnia Przeznaczenia", "type": "Quest", "details": "Rozpal prastare piece w Nidavellirze.", "exp_reward": 5000 },
+    { "id": "q2", "title": "Ostrzeżenie Heimdalla", "type": "Quest", "details": "Zbadaj anomalie na tęczowym moście Bifrost.", "exp_reward": 1200 },
+    { "id": "q3", "title": "Zmierzch Bogów (Ragnarok)", "type": "Quest", "details": "Weź udział w ostatecznej bitwie na równinie Vigrid.", "exp_reward": 30000 },
+    { "id": "q4", "title": "Polowanie na Wilka", "type": "Quest", "details": "Uwięź Fenrira za pomocą magicznego sznura Gleipnira.", "exp_reward": 8000 },
+    { "id": "q5", "title": "Sztuczki i Kłamstwa", "type": "Quest", "details": "Wykonaj intrygę zleconą przez Lokiego w tajemnicy przed Thorem.", "exp_reward": 3500 },
+
+    { "id": "s1", "name": "Uderzenie Pioruna", "type": "Skill", "details": "Zrzuca błyskawicę na pojedynczy cel.", "cooldown": 10 },
+    { "id": "s2", "name": "Gniew Thora", "type": "Skill", "details": "Potężny atak obszarowy paraliżujący wrogów.", "cooldown": 45 },
+    { "id": "s3", "name": "Mądrość Run", "type": "Skill", "details": "Zwiększa regenerację many i odsłania ukryte ścieżki.", "cooldown": 60 },
+    { "id": "s4", "name": "Oko Odyna", "type": "Skill", "details": "Pasywne wykrywanie słabych punktów legendarnych bossów.", "cooldown": 0 },
+    { "id": "s5", "name": "Krok Walkirii", "type": "Skill", "details": "Błyskawiczna teleportacja na polu bitwy.", "cooldown": 15 },
+    { "id": "s6", "name": "Zionięcie Surtra", "type": "Skill", "details": "Strumień żywego ognia, topiący nawet lód.", "cooldown": 25 },
+
+    { "id": "el1", "name": "Ogień", "type": "Element", "details": "Żywioł ognia, spala cele i nakłada efekt podpalenia.", "color": "#FF4500" },
+    { "id": "el2", "name": "Lód", "type": "Element", "details": "Żywioł lodu, spowalnia wrogów i zamraża struktury.", "color": "#00FFFF" },
+    { "id": "el3", "name": "Błyskawice", "type": "Element", "details": "Żywioł piorunów, zadaje potężne obrażenia seryjne.", "color": "#FFD700" },
+    { "id": "el4", "name": "Trucizna", "type": "Element", "details": "Kwasowy i toksyczny żywioł niszczący zbroję.", "color": "#32CD32" }
+  ],
+  "links": [
+    { "source": "n1", "target": "z1", "type": "RESIDES_IN" },
+    { "source": "n2", "target": "z1", "type": "RESIDES_IN" },
+    { "source": "n6", "target": "z1", "type": "RESIDES_IN" },
+    { "source": "n3", "target": "z9", "type": "RESIDES_IN" },
+    { "source": "n4", "target": "z5", "type": "RESIDES_IN" },
+    { "source": "n5", "target": "z2", "type": "RESIDES_IN" },
+
+    { "source": "m1", "target": "z4", "type": "SPAWNS_IN" },
+    { "source": "m2", "target": "z2", "type": "SPAWNS_IN" },
+    { "source": "m3", "target": "z3", "type": "SPAWNS_IN" },
+    { "source": "m4", "target": "z6", "type": "SPAWNS_IN" },
+    { "source": "m5", "target": "z7", "type": "SPAWNS_IN" },
+
+    { "source": "n4", "target": "q1", "type": "GIVES" },
+    { "source": "n6", "target": "q2", "type": "GIVES" },
+    { "source": "n1", "target": "q3", "type": "GIVES" },
+    { "source": "n2", "target": "q4", "type": "GIVES" },
+    { "source": "n5", "target": "q5", "type": "GIVES" },
+
+    { "source": "q1", "target": "z5", "type": "TAKES_PLACE_IN" },
+    { "source": "q4", "target": "z4", "type": "TAKES_PLACE_IN" },
+    { "source": "q5", "target": "z2", "type": "TAKES_PLACE_IN" },
+
+    { "source": "q1", "target": "q2", "type": "PRE_REQUISITE" },
+    { "source": "q4", "target": "q1", "type": "PRE_REQUISITE" },
+    { "source": "q3", "target": "q4", "type": "PRE_REQUISITE" },
+    { "source": "q5", "target": "q2", "type": "PRE_REQUISITE" },
+
+    { "source": "i1", "target": "mat1", "type": "REQUIRES", "quantity": 8 },
+    { "source": "i1", "target": "mat2", "type": "REQUIRES", "quantity": 1 },
+    { "source": "i1", "target": "mat5", "type": "REQUIRES", "quantity": 3 },
+    { "source": "i2", "target": "mat4", "type": "REQUIRES", "quantity": 2 },
+    { "source": "i2", "target": "mat1", "type": "REQUIRES", "quantity": 5 },
+    { "source": "i3", "target": "mat3", "type": "REQUIRES", "quantity": 4 },
+    { "source": "i4", "target": "mat1", "type": "REQUIRES", "quantity": 4 },
+
+    { "source": "m1", "target": "mat2", "type": "DROPS", "chance": 0.15 },
+    { "source": "m2", "target": "mat3", "type": "DROPS", "chance": 1.00 },
+    { "source": "m3", "target": "mat1", "type": "DROPS", "chance": 0.50 },
+    { "source": "m4", "target": "mat5", "type": "DROPS", "chance": 0.80 },
+    { "source": "m5", "target": "mat4", "type": "DROPS", "chance": 0.30 },
+
+    { "source": "s2", "target": "s1", "type": "UNLOCKS" },
+    { "source": "s4", "target": "s3", "type": "UNLOCKS" },
+    { "source": "s5", "target": "s1", "type": "UNLOCKS" },
+
+    { "source": "m3", "target": "el1", "type": "WEAK_AGAINST" },
+    { "source": "m3", "target": "el2", "type": "RESISTANT_TO" },
+    { "source": "m4", "target": "el2", "type": "WEAK_AGAINST" },
+    { "source": "m4", "target": "el1", "type": "RESISTANT_TO" },
+    { "source": "m2", "target": "el3", "type": "WEAK_AGAINST" },
+    { "source": "m2", "target": "el4", "type": "RESISTANT_TO" },
+    { "source": "m5", "target": "el3", "type": "WEAK_AGAINST" },
+    { "source": "m5", "target": "el1", "type": "WEAK_AGAINST" },
+    { "source": "m1", "target": "el1", "type": "WEAK_AGAINST" },
+    
+    { "source": "i1", "target": "el3", "type": "IMBUED_WITH" },
+    { "source": "i5", "target": "el2", "type": "IMBUED_WITH" },
+    { "source": "i6", "target": "el1", "type": "IMBUED_WITH" },
+    
+    { "source": "s1", "target": "el3", "type": "USES_ELEMENT" },
+    { "source": "s2", "target": "el3", "type": "USES_ELEMENT" },
+    { "source": "s6", "target": "el1", "type": "USES_ELEMENT" }
+  ]
+}

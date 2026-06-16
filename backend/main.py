@@ -142,3 +142,50 @@ def expand_node(node_id: str):
         "nodes": list(nodes_dict.values()),
         "links": links
     }
+
+@app.get("/api/path")
+def shortest_path(source: str, target: str):
+    # Wykorzystanie natywnego algorytmu grafowego: shortestPath
+    query = """
+    MATCH (start) WHERE elementId(start) = $source
+    MATCH (end) WHERE elementId(end) = $target
+    MATCH p = shortestPath((start)-[*]-(end))
+    RETURN nodes(p) as path_nodes, relationships(p) as path_rels
+    """
+    
+    results = db.query(query, parameters={"source": source, "target": target})
+    
+    nodes_dict = {}
+    links = []
+    
+    if results and len(results) > 0:
+        record = results[0]
+        path_nodes = record['path_nodes']
+        path_rels = record['path_rels']
+        
+        def serialize_node(node):
+            props = dict(node.items())
+            if 'id' in props:
+                props['game_id'] = props.pop('id')
+            return {
+                "id": node.element_id,
+                "label": list(node.labels)[0] if node.labels else "Unknown",
+                **props
+            }
+            
+        for n in path_nodes:
+            if n.element_id not in nodes_dict:
+                nodes_dict[n.element_id] = serialize_node(n)
+                
+        for r in path_rels:
+            links.append({
+                "source": r.nodes[0].element_id,
+                "target": r.nodes[1].element_id,
+                "type": r.type,
+                **dict(r.items())
+            })
+            
+    return {
+        "nodes": list(nodes_dict.values()),
+        "links": links
+    }

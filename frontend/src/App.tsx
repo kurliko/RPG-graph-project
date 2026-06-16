@@ -74,6 +74,22 @@ const translateRelation = (type: string): string => {
   return dict[type] || type;
 };
 
+const translateDetailKey = (key: string): string => {
+  const dict: Record<string, string> = {
+    'details': 'Opis',
+    'min_level': 'Min. poziom',
+    'level': 'Poziom',
+    'faction': 'Frakcja',
+    'category': 'Kategoria',
+    'rarity': 'Rzadkość',
+    'exp_reward': 'Nagroda (EXP)',
+    'cooldown': 'Czas odnowienia',
+    'weight': 'Waga',
+    'type': 'Typ'
+  };
+  return dict[key] || key;
+};
+
 function App() {
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
   const [loading, setLoading] = useState(true);
@@ -423,10 +439,10 @@ function App() {
                 
                 <div className="details-list">
                   {Object.entries(selectedNode)
-                    .filter(([key]) => !['id', 'x', 'y', 'vx', 'vy', 'index', 'name', 'title', 'label'].includes(key))
+                    .filter(([key]) => !key.startsWith('_') && !key.startsWith('F') && !['id', 'x', 'y', 'vx', 'vy', 'index', 'name', 'title', 'label', 'game_id'].includes(key))
                     .map(([key, value]) => (
                       <div className="detail-item" key={key}>
-                        <span className="detail-key">{key}:</span>
+                        <span className="detail-key">{translateDetailKey(key)}:</span>
                         <span className="detail-value">{String(value)}</span>
                       </div>
                     ))}

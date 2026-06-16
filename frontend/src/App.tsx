@@ -311,17 +311,6 @@ function App() {
       </header>
       
       <div className="main-content">
-        {(pathSource || pathTarget) && (
-          <div className="path-panel">
-            <h3>Ścieżka</h3>
-            <div className="path-endpoints">
-              <p>📍 Start: {pathSource ? (pathSource.name || pathSource.title || pathSource.game_id) : '...'}</p>
-              <p>🎯 Cel: {pathTarget ? (pathTarget.name || pathTarget.title || pathTarget.game_id) : '...'}</p>
-            </div>
-            <button onClick={handleFindPath} disabled={!pathSource || !pathTarget} className="action-button expand-btn" style={{width: '100%', marginBottom: '5px'}}>Szukaj Ścieżki</button>
-            <button onClick={clearPath} className="action-button close-btn" style={{width: '100%'}}>Wyczyść</button>
-          </div>
-        )}
         <div className="graph-wrapper">
           <ForceGraph2D
             ref={fgRef}
@@ -392,32 +381,31 @@ function App() {
         </div>
         
         {/* Panel boczny */}
-        <div className={`sidebar ${selectedNode ? 'open' : ''}`}>
-          {selectedNode ? (
-            <div className="sidebar-content">
-              <h2>{selectedNode.name || selectedNode.title || 'Nieznany Obiekt'}</h2>
-              <span className="badge" style={{backgroundColor: getNodeColor(selectedNode)}}>
-                {selectedNode.label}
-              </span>
-              
-              <div className="details-list">
-                {Object.entries(selectedNode)
-                  .filter(([key]) => !['id', 'x', 'y', 'vx', 'vy', 'index', 'name', 'title', 'label'].includes(key))
-                  .map(([key, value]) => (
-                    <div className="detail-item" key={key}>
-                      <span className="detail-key">{key}:</span>
-                      <span className="detail-value">{String(value)}</span>
-                    </div>
-                  ))}
-              </div>
+        <div className={`sidebar ${selectedNode || pathSource || pathTarget ? 'open' : ''}`}>
+          <div className="sidebar-content" style={{ height: '100%', overflowY: 'auto' }}>
+            {selectedNode ? (
+              <>
+                <h2>{selectedNode.name || selectedNode.title || 'Nieznany Obiekt'}</h2>
+                <span className="badge" style={{backgroundColor: getNodeColor(selectedNode)}}>
+                  {selectedNode.label}
+                </span>
+                
+                <div className="details-list">
+                  {Object.entries(selectedNode)
+                    .filter(([key]) => !['id', 'x', 'y', 'vx', 'vy', 'index', 'name', 'title', 'label'].includes(key))
+                    .map(([key, value]) => (
+                      <div className="detail-item" key={key}>
+                        <span className="detail-key">{key}:</span>
+                        <span className="detail-value">{String(value)}</span>
+                      </div>
+                    ))}
+                </div>
 
-              <button className="action-button expand-btn" onClick={handleExpandNode}>
-                🔍 Eksploruj powiązania
-              </button>
-              
-              <div className="pathfinder-actions">
-                <h4 style={{margin: '0 0 5px 0', color: '#8b949e'}}>Narzędzie Ścieżki</h4>
-                <div style={{display: 'flex', gap: '10px'}}>
+                <button className="action-button expand-btn" onClick={handleExpandNode}>
+                  🔍 Eksploruj powiązania
+                </button>
+                
+                <div style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
                   <button className="action-button path-btn" onClick={() => setPathSource(selectedNode)} style={{flex: 1}}>
                     📍 Ustaw Start
                   </button>
@@ -425,17 +413,45 @@ function App() {
                     🎯 Ustaw Cel
                   </button>
                 </div>
+              </>
+            ) : (
+              <div style={{ color: '#8b949e', fontStyle: 'italic', marginBottom: '20px' }}>
+                Wybierz węzeł, aby zobaczyć jego szczegóły.
               </div>
+            )}
+            
+            <hr style={{ borderColor: '#30363d', margin: '20px 0', width: '100%' }} />
+            
+            {/* Sekcja Pathfindera w panelu bocznym */}
+            <div>
+              <h3 style={{ color: '#FFD700', margin: '0 0 10px 0' }}>Ścieżka</h3>
+              <p style={{ margin: '5px 0', fontSize: '0.9rem' }}>📍 Start: {pathSource ? (pathSource.name || pathSource.title || pathSource.game_id) : '---'}</p>
+              <p style={{ margin: '5px 0', fontSize: '0.9rem' }}>🎯 Cel: {pathTarget ? (pathTarget.name || pathTarget.title || pathTarget.game_id) : '---'}</p>
               
-              <button className="action-button close-btn" onClick={() => setSelectedNode(null)}>
-                Zamknij panel
+              <button 
+                onClick={handleFindPath} 
+                disabled={!pathSource || !pathTarget} 
+                className="action-button expand-btn" 
+                style={{width: '100%', marginTop: '15px'}}
+              >
+                Szukaj Ścieżki
               </button>
+              
+              {(pathSource || pathTarget || pathNodes.size > 0) && (
+                <button onClick={clearPath} className="action-button close-btn" style={{width: '100%', marginTop: '10px'}}>
+                  Wyczyść narzędzie ścieżki
+                </button>
+              )}
             </div>
-          ) : (
-            <div className="sidebar-empty">
-              Wybierz węzeł, aby zobaczyć szczegóły.
-            </div>
-          )}
+
+            <button 
+              className="action-button close-btn" 
+              style={{marginTop: 'auto'}} 
+              onClick={() => { setSelectedNode(null); clearPath(); }}
+            >
+              Zamknij cały panel
+            </button>
+          </div>
         </div>
       </div>
     </div>

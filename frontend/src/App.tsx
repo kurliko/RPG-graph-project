@@ -395,9 +395,11 @@ function App() {
       
       if (fgRef.current) {
         fgRef.current.d3ReheatSimulation();
-        setTimeout(() => {
-            fgRef.current.zoomToFit(1000, 50);
-        }, 300);
+        // Zamiast oddalać całą mapę, zróbmy zbliżenie na potwora, by zobaczyć rekomendowany sprzęt obok niego
+        if (selectedNode.x !== undefined && selectedNode.y !== undefined) {
+          fgRef.current.centerAt(selectedNode.x, selectedNode.y, 1000);
+          fgRef.current.zoom(3.5, 1000);
+        }
       }
       
     } catch (error) {

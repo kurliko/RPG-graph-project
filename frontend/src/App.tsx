@@ -608,11 +608,16 @@ function App() {
                   <IconSearch /> Eksploruj powiązania
                 </button>
                 <button className="action-button expand-btn" onClick={() => handleDoubleClickExpand(selectedNode)}>
-                  <IconSearch /> Wyizoluj sąsiadów
+                  <IconSearch /> Pobierz powiązania (Rozwiń)
                 </button>
                 {selectedNode.label === 'Monster' && (
                   <button className="action-button" style={{backgroundColor: '#4a1515', color: '#ffb3b3', marginTop: '10px'}} onClick={handleRecommend}>
                     ⚔️ Znajdź wyposażenie na potwora
+                  </button>
+                )}
+                {selectedNode.label === 'Item' && (
+                  <button className="action-button" style={{backgroundColor: '#3a2800', color: '#d4af37', marginTop: '10px', border: '1px solid #d4af37'}} onClick={() => handleShowRecipe(selectedNode)}>
+                    🛠️ Pokaż jak stworzyć (Przepis)
                   </button>
                 )}
                 

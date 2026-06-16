@@ -30,6 +30,10 @@ function App() {
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Node[]>([]);
+  const [pathSource, setPathSource] = useState<Node | null>(null);
+  const [pathTarget, setPathTarget] = useState<Node | null>(null);
+  const [pathNodes, setPathNodes] = useState<Set<string>>(new Set());
+  const [pathLinks, setPathLinks] = useState<Set<string>>(new Set());
   const fgRef = useRef<any>();
 
   // Inicjalne załadowanie grafu
@@ -124,6 +128,53 @@ function App() {
     setSearchResults([]);
   };
 
+  const handleFindPath = async () => {
+    if (!pathSource || !pathTarget) return;
+    try {
+      const res = await axios.get(`http://localhost:8000/api/path?source=${encodeURIComponent(pathSource.id)}&target=${encodeURIComponent(pathTarget.id)}`);
+      
+      const pNodes = new Set<string>();
+      const pLinks = new Set<string>();
+      res.data.nodes.forEach((n: any) => pNodes.add(n.id));
+      res.data.links.forEach((l: any) => {
+        const sid = typeof l.source === 'object' ? l.source.id : l.source;
+        const tid = typeof l.target === 'object' ? l.target.id : l.target;
+        pLinks.add(`${sid}-${l.type}-${tid}`);
+      });
+      setPathNodes(pNodes);
+      setPathLinks(pLinks);
+      
+      // Dodajemy do głównego grafu jeśli węzły lub relacje są nowe
+      setData((prevData) => {
+        const nodeMap = new Map(prevData.nodes.map(n => [n.id, n]));
+        res.data.nodes.forEach((n: Node) => nodeMap.set(n.id, n));
+        
+        const linkMap = new Map(prevData.links.map(l => {
+          const s = typeof l.source === 'object' ? l.source.id : l.source;
+          const t = typeof l.target === 'object' ? l.target.id : l.target;
+          return [`${s}-${l.type}-${t}`, l];
+        }));
+        
+        res.data.links.forEach((l: Link) => {
+          const s = typeof l.source === 'object' ? l.source.id : l.source;
+          const t = typeof l.target === 'object' ? l.target.id : l.target;
+          linkMap.set(`${s}-${l.type}-${t}`, l);
+        });
+        return { nodes: Array.from(nodeMap.values()), links: Array.from(linkMap.values()) };
+      });
+    } catch (e) {
+      console.error(e);
+      alert("Nie znaleziono ścieżki!");
+    }
+  };
+
+  const clearPath = () => {
+    setPathSource(null);
+    setPathTarget(null);
+    setPathNodes(new Set());
+    setPathLinks(new Set());
+  };
+
   if (loading) return <div className="loading">Ładowanie grafu...</div>;
 
   return (
@@ -163,6 +214,17 @@ function App() {
       </header>
       
       <div className="main-content">
+        {(pathSource || pathTarget) && (
+          <div className="path-panel">
+            <h3>Ścieżka</h3>
+            <div className="path-endpoints">
+              <p>📍 Start: {pathSource ? (pathSource.name || pathSource.title || pathSource.game_id) : '...'}</p>
+              <p>🎯 Cel: {pathTarget ? (pathTarget.name || pathTarget.title || pathTarget.game_id) : '...'}</p>
+            </div>
+            <button onClick={handleFindPath} disabled={!pathSource || !pathTarget} className="action-button expand-btn" style={{width: '100%', marginBottom: '5px'}}>Szukaj Ścieżki</button>
+            <button onClick={clearPath} className="action-button close-btn" style={{width: '100%'}}>Wyczyść</button>
+          </div>
+        )}
         <div className="graph-wrapper">
           <ForceGraph2D
             ref={fgRef}
@@ -170,19 +232,36 @@ function App() {
             nodeLabel={(node: any) => `${node.label}: ${node.name || node.title || node.game_id}`}
             nodeColor={(node: any) => getNodeColor(node)}
             nodeRelSize={7}
-            linkColor={() => '#444'}
+            linkColor={(link: any) => {
+              const sid = typeof link.source === 'object' ? link.source.id : link.source;
+              const tid = typeof link.target === 'object' ? link.target.id : link.target;
+              return pathLinks.has(`${sid}-${link.type}-${tid}`) ? '#FFD700' : '#444';
+            }}
+            linkWidth={(link: any) => {
+              const sid = typeof link.source === 'object' ? link.source.id : link.source;
+              const tid = typeof link.target === 'object' ? link.target.id : link.target;
+              return pathLinks.has(`${sid}-${link.type}-${tid}`) ? 3 : 1;
+            }}
             linkDirectionalArrowLength={5}
             linkDirectionalArrowRelPos={1}
             linkLabel={(link: any) => link.type}
             onNodeClick={handleNodeClick}
             // Zaznaczanie klikniętego węzła
-            nodeCanvasObjectMode={node => node.id === selectedNode?.id ? 'before' : undefined}
+            nodeCanvasObjectMode={node => (node.id === selectedNode?.id || pathNodes.has(node.id as string)) ? 'before' : undefined}
             nodeCanvasObject={(node, ctx) => {
-              if (node.id === selectedNode?.id && node.x && node.y) {
-                ctx.beginPath();
-                ctx.arc(node.x, node.y, 10, 0, 2 * Math.PI, false);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                ctx.fill();
+              if (node.x && node.y) {
+                if (node.id === selectedNode?.id) {
+                  ctx.beginPath();
+                  ctx.arc(node.x, node.y, 12, 0, 2 * Math.PI, false);
+                  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                  ctx.fill();
+                }
+                if (pathNodes.has(node.id as string)) {
+                  ctx.beginPath();
+                  ctx.arc(node.x, node.y, 14, 0, 2 * Math.PI, false);
+                  ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+                  ctx.fill();
+                }
               }
             }}
           />
@@ -211,6 +290,18 @@ function App() {
               <button className="action-button expand-btn" onClick={handleExpandNode}>
                 🔍 Eksploruj powiązania
               </button>
+              
+              <div className="pathfinder-actions">
+                <h4 style={{margin: '0 0 5px 0', color: '#8b949e'}}>Narzędzie Ścieżki</h4>
+                <div style={{display: 'flex', gap: '10px'}}>
+                  <button className="action-button path-btn" onClick={() => setPathSource(selectedNode)} style={{flex: 1}}>
+                    📍 Ustaw Start
+                  </button>
+                  <button className="action-button path-btn" onClick={() => setPathTarget(selectedNode)} style={{flex: 1}}>
+                    🎯 Ustaw Cel
+                  </button>
+                </div>
+              </div>
               
               <button className="action-button close-btn" onClick={() => setSelectedNode(null)}>
                 Zamknij panel

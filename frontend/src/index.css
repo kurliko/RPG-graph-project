@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -137,12 +141,12 @@ body {
 
 /* Sidebar Styling - Glassmorphism */
 .sidebar {
-  width: 320px;
+  width: 360px;
   background-color: rgba(18, 28, 22, 0.92);
   backdrop-filter: blur(12px);
   border-right: 1px solid #2a3d32;
   position: absolute;
-  left: -320px;
+  left: -360px;
   top: 0;
   bottom: 0;
   transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -157,10 +161,11 @@ body {
 }
 
 .sidebar-content {
-  padding: 80px 20px 20px 20px; /* offset for header */
+  padding: 65px 20px 20px 20px; /* offset for header */
   display: flex;
   flex-direction: column;
   color: #e8e4c9;
+  overflow-x: hidden;
 }
 
 .sidebar-content h2 {

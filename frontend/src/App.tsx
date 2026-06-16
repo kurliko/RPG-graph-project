@@ -113,6 +113,8 @@ function App() {
   const [pathNodes, setPathNodes] = useState<Set<string>>(new Set());
   const [pathLinks, setPathLinks] = useState<Set<string>>(new Set());
   const [recommendedEquipment, setRecommendedEquipment] = useState<Node[]>([]);
+  const [activeRecipe, setActiveRecipe] = useState<any[] | null>(null);
+  const [recipeItemName, setRecipeItemName] = useState<string>('');
   
   // Referencje do śledzenia podwójnego kliknięcia i efektów poświaty
   const fgRef = useRef<any>();
@@ -247,6 +249,7 @@ function App() {
       clickTimeout.current = setTimeout(async () => {
         if (selectedNode?.id !== node.id) {
           setRecommendedEquipment([]); // Wyczyść rekomendacje przy zmianie węzła
+          setActiveRecipe(null); // Wyczyść przepis
         }
         
         let nodeData = { ...node };
@@ -429,6 +432,21 @@ function App() {
     }
   };
 
+  const handleShowRecipe = async (item: Node) => {
+    try {
+      const res = await axios.get(`http://localhost:8000/api/crafting/${encodeURIComponent(item.id as string)}`);
+      if (res.data.recipe && res.data.recipe.length > 0) {
+        setActiveRecipe(res.data.recipe);
+        setRecipeItemName((item.name || item.title || 'Przedmiot') as string);
+      } else {
+        alert("Ten przedmiot nie posiada znanego schematu craftingu (może wylecieć jako cały przedmiot).");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Błąd podczas pobierania przepisu z bazy.");
+    }
+  };
+
   if (loading) return <div className="loading">Ładowanie grafu...</div>;
 
   return (
@@ -608,6 +626,40 @@ function App() {
                           <span style={{ color: '#e8e4c9', fontWeight: 600, fontSize: '0.95rem' }}>{item.name || item.title}</span>
                           <span style={{ color: '#a3c9a8', fontSize: '0.75rem', textTransform: 'uppercase' }}>{translateLabel(item.label as string)}</span>
                         </div>
+                        {item.label === 'Item' && (
+                          <button 
+                            className="recipe-btn"
+                            style={{ marginLeft: 'auto', backgroundColor: '#3a2800', border: '1px solid #d4af37', color: '#d4af37', fontSize: '0.75rem', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Cinzel Decorative' }}
+                            onClick={(e) => { e.stopPropagation(); handleShowRecipe(item); }}
+                          >
+                            🛠️ Przepis
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {activeRecipe && (
+                  <div style={{ marginTop: '15px', border: '1px solid #7cb342', padding: '15px', borderRadius: '8px', backgroundColor: 'rgba(124, 179, 66, 0.1)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h4 style={{ color: '#aed581', margin: 0, fontFamily: 'Cinzel Decorative', letterSpacing: '1px' }}>🛠️ Składniki: {recipeItemName}</h4>
+                      <button onClick={() => setActiveRecipe(null)} style={{ background: 'none', border: 'none', color: '#aed581', cursor: 'pointer', fontSize: '1.2rem', padding: '0 5px' }}>✕</button>
+                    </div>
+                    {activeRecipe.map((ingred, idx) => (
+                      <div key={idx} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: idx < activeRecipe.length - 1 ? '1px dotted rgba(124, 179, 66, 0.3)' : 'none' }}>
+                        <div style={{ color: '#e8e4c9', fontWeight: 'bold' }}>
+                          {ingred.quantity}x {ingred.material}
+                        </div>
+                        {ingred.sources && ingred.sources.length > 0 ? (
+                          <div style={{ fontSize: '0.8rem', color: '#bcaaa4', marginTop: '4px' }}>
+                            Zdobywane z: <span style={{color: '#ffb3b3'}}>{ingred.sources.join(', ')}</span>
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: '0.8rem', color: '#bcaaa4', marginTop: '4px', fontStyle: 'italic' }}>
+                            Nieznane źródło (poszukaj u legendarnych rzemieślników)
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -666,7 +718,7 @@ function App() {
             <button 
               className="action-button close-btn" 
               style={{marginTop: 'auto'}} 
-              onClick={() => { setSelectedNode(null); clearPath(); setRecommendedEquipment([]); }}
+              onClick={() => { setSelectedNode(null); clearPath(); setRecommendedEquipment([]); setActiveRecipe(null); }}
             >
               Zamknij cały panel
             </button>

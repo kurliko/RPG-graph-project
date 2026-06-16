@@ -270,3 +270,33 @@ def get_node_details(node_id: str):
             "resistances": ", ".join(record["resistances"]) if record["resistances"] else ""
         }
     return {"weaknesses": "", "resistances": ""}
+
+@app.get("/api/crafting/{item_id}")
+def get_crafting_recipe(item_id: str):
+    query = """
+    MATCH (i:Item)-[req:REQUIRES]->(mat:Material)
+    WHERE elementId(i) = $item_id
+    OPTIONAL MATCH (mat)<-[drop:DROPS]-(m:Monster)
+    RETURN 
+        elementId(mat) as mat_id,
+        mat.name as material_name,
+        req.quantity as quantity,
+        collect({monster: m.name, chance: drop.chance}) as drops
+    """
+    results = db.query(query, parameters={"item_id": item_id})
+    recipe = []
+    if results:
+        for record in results:
+            drops = []
+            for d in record["drops"]:
+                if d.get("monster"):
+                    chance_pct = int(d["chance"] * 100) if d.get("chance") else 0
+                    drops.append(f"{d['monster']} ({chance_pct}%)")
+            
+            recipe.append({
+                "id": record["mat_id"],
+                "material": record["material_name"],
+                "quantity": record["quantity"],
+                "sources": list(set(drops))
+            })
+    return {"recipe": recipe}

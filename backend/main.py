@@ -92,3 +92,53 @@ def search_nodes(q: str):
             })
             
     return {"nodes": nodes}
+
+@app.get("/api/nodes/{node_id}/expand")
+def expand_node(node_id: str):
+    # Wyszukujemy węzeł po ID i dobieramy wszystkich jego sąsiadów dookoła (bez względu na kierunek relacji)
+    query = """
+    MATCH (n)-[r]-(m)
+    WHERE elementId(n) = $node_id
+    RETURN n, r, m
+    LIMIT 50
+    """
+    
+    results = db.query(query, parameters={"node_id": node_id})
+    
+    nodes_dict = {}
+    links = []
+    
+    if results:
+        for record in results:
+            n = record['n']
+            m = record['m']
+            r = record['r']
+            
+            def serialize_node(node):
+                props = dict(node.items())
+                if 'id' in props:
+                    props['game_id'] = props.pop('id')
+                return {
+                    "id": node.element_id,
+                    "label": list(node.labels)[0] if node.labels else "Unknown",
+                    **props
+                }
+            
+            if n.element_id not in nodes_dict:
+                nodes_dict[n.element_id] = serialize_node(n)
+            
+            if m.element_id not in nodes_dict:
+                nodes_dict[m.element_id] = serialize_node(m)
+                
+            # W relacjach w Python driver element [0] to źródło, a [1] to cel
+            links.append({
+                "source": r.nodes[0].element_id,
+                "target": r.nodes[1].element_id,
+                "type": r.type,
+                **dict(r.items())
+            })
+            
+    return {
+        "nodes": list(nodes_dict.values()),
+        "links": links
+    }

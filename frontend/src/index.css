@@ -38,20 +38,15 @@ body {
   height: 100vh;
 }
 
-.header {
-  background-color: #161b22;
-  padding: 1rem 2rem;
-  border-bottom: 1px solid #30363d;
+.app-header {
+  height: 60px;
+  background-color: rgba(18, 28, 22, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #2a3d32;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  padding: 0 20px;
   z-index: 10;
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 1.4rem;
-  color: #c9d1d9;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
 

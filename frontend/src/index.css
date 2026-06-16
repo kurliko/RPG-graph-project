@@ -240,15 +240,20 @@ body {
 }
 
 .expand-btn {
-  background-color: #238636;
-  color: white;
-  margin-top: 1rem;
+  background-color: #1a3322;
+}
+.expand-btn:hover {
+  background-color: #24472f;
 }
 
 .close-btn {
-  background-color: transparent;
-  color: #ff7b72;
-  border: 1px solid #ff7b72;
+  background-color: #331a1a;
+  color: #e26d6d;
+}
+
+.close-btn:hover {
+  background-color: #472424;
+  color: #ff8c8c;
 }
 
 .sidebar-empty {
@@ -291,10 +296,10 @@ body {
 }
 
 .path-btn {
-  background-color: #1f6feb;
-  color: white;
-  padding: 0.5rem;
-  font-size: 0.85rem;
+  background-color: #1a2a33;
+}
+.path-btn:hover {
+  background-color: #243b47;
 }
 
 .loading {

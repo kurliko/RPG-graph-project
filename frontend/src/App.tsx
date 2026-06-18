@@ -562,28 +562,9 @@ function App() {
           RPG Graph
         </div>
         
-        <div className="search-container">
-          <input 
-            type="text" 
-            placeholder="Szukaj (np. Mjolnir)..." 
-            value={searchQuery}
-            onChange={handleSearch}
-            className="search-input"
-          />
-          {searchResults.length > 0 && (
-            <div className="search-results">
-              {searchResults.map(n => (
-                <div key={n.id} className="search-result-item" onClick={() => handleSelectSearchResult(n.id)}>
-                  {n.name || n.title || n.game_id} <span style={{fontSize: '0.7rem', color: '#8b949e'}}>({n.label})</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        
         <button 
           className="action-button close-btn" 
-          style={{marginLeft: '15px', padding: '5px 15px'}}
+          style={{marginLeft: 'auto', padding: '5px 15px'}}
           onClick={() => window.location.reload()}
         >
           <IconRefresh /> Resetuj Graf
@@ -615,6 +596,25 @@ function App() {
       </header>
       
       <div className="main-content">
+        <div className="floating-search-container">
+          <input 
+            type="text" 
+            placeholder="Szukaj wiedzy w grafie (np. Thor, Mjolnir, Runy)..." 
+            value={searchQuery}
+            onChange={handleSearch}
+            className="search-input"
+          />
+          {searchResults.length > 0 && (
+            <div className="search-results">
+              {searchResults.map(n => (
+                <div key={n.id} className="search-result-item" onClick={() => handleSelectSearchResult(n.id)}>
+                  {n.name || n.title || n.game_id} <span style={{fontSize: '0.7rem', color: '#8b949e'}}>({n.label})</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        
         <div className="graph-wrapper">
           <ForceGraph2D
             ref={fgRef}

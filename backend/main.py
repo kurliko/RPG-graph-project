@@ -252,6 +252,48 @@ def recommend_equipment(monster_id: str):
         "links": list(unique_links.values())
     }
 
+@app.get("/api/usages/{material_id}")
+def get_usages(material_id: str):
+    query = """
+    MATCH (i:Item)-[r:REQUIRES_MATERIAL]->(m:Material)
+    WHERE elementId(m) = $material_id
+    RETURN i, r, m
+    """
+    results = db.query(query, parameters={"material_id": material_id})
+    nodes_dict = {}
+    links = []
+    
+    def serialize_node(node):
+        props = dict(node.items())
+        if 'id' in props:
+            props['game_id'] = props.pop('id')
+        return {
+            "id": node.element_id,
+            "label": list(node.labels)[0] if node.labels else "Unknown",
+            **props
+        }
+        
+    if results:
+        for record in results:
+            i = record['i']
+            r = record['r']
+            m = record['m']
+            
+            if i is not None and i.element_id not in nodes_dict:
+                nodes_dict[i.element_id] = serialize_node(i)
+            if m is not None and m.element_id not in nodes_dict:
+                nodes_dict[m.element_id] = serialize_node(m)
+            if r is not None:
+                links.append({"source": r.nodes[0].element_id, "target": r.nodes[1].element_id, "type": r.type, **dict(r.items())})
+                
+    unique_links = {f"{l['source']}-{l['type']}-{l['target']}": l for l in links}
+    
+    return {
+        "nodes": list(nodes_dict.values()),
+        "links": list(unique_links.values())
+    }
+
+
 @app.get("/api/nodes/{node_id}/details")
 def get_node_details(node_id: str):
     query = """

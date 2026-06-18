@@ -155,6 +155,7 @@ function App() {
   const [recipeItemName, setRecipeItemName] = useState<string>('');
   const [activeObtainInfo, setActiveObtainInfo] = useState<any[] | null>(null);
   const [obtainSkillName, setObtainSkillName] = useState<string>('');
+  const [materialUsages, setMaterialUsages] = useState<any[] | null>(null);
   const [showWelcome, setShowWelcome] = useState<boolean>(true);
   
   // Referencje do śledzenia podwójnego kliknięcia i efektów poświaty
@@ -298,6 +299,7 @@ function App() {
           setRecommendedEquipment([]); // Wyczyść rekomendacje przy zmianie węzła
           setActiveRecipe(null); // Wyczyść przepis
           setActiveObtainInfo(null); // Wyczyść źródło
+          setMaterialUsages(null); // Wyczyść zastosowania
         }
         
         let nodeData = { ...node };
@@ -509,12 +511,30 @@ function App() {
         setActiveObtainInfo(res.data.sources);
         setObtainSkillName((skill.name || skill.title || 'Umiejętność') as string);
         setActiveRecipe(null);
+        setMaterialUsages(null);
       } else {
         alert("Brak informacji o tym, jak zdobyć tę umiejętność.");
       }
     } catch (e) {
       console.error(e);
       alert("Błąd podczas pobierania informacji o źródle.");
+    }
+  };
+
+  const handleShowUsages = async (material: Node) => {
+    try {
+      const res = await axios.get(`http://localhost:8000/api/usages/${encodeURIComponent(material.id as string)}`);
+      const items = res.data.nodes.filter((n: any) => n.label === 'Item');
+      if (items.length > 0) {
+        setMaterialUsages(items);
+        setActiveRecipe(null);
+        setActiveObtainInfo(null);
+      } else {
+        alert("Nie znaleziono przedmiotów, które można stworzyć z tego materiału.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Błąd podczas pobierania informacji o zastosowaniu materiału.");
     }
   };
 
@@ -774,6 +794,11 @@ function App() {
                     <IconSearch /> Pokaż jak zdobyć
                   </button>
                 )}
+                {selectedNode.label === 'Material' && (
+                  <button className="action-button expand-btn" style={{backgroundColor: '#1f2937', color: '#a3c9a8', marginTop: '10px', border: '1px solid #a3c9a8'}} onClick={() => handleShowUsages(selectedNode)}>
+                    <IconTools /> Do czego służy (Zastosowanie)
+                  </button>
+                )}
                 
                 {recommendedEquipment.length > 0 && (
                   <div style={{ marginTop: '15px', border: '1px solid #d4af37', padding: '15px', borderRadius: '8px', backgroundColor: 'rgba(212, 175, 55, 0.05)' }}>
@@ -846,6 +871,25 @@ function App() {
                         </div>
                         <div style={{ fontSize: '0.8rem', color: '#bcaaa4', marginTop: '4px' }}>
                           Powiązanie: <span style={{color: '#58a6ff'}}>{translateRelation(src.type)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {materialUsages && (
+                  <div style={{ marginTop: '15px', border: '1px solid #a3c9a8', padding: '15px', borderRadius: '8px', backgroundColor: 'rgba(163, 201, 168, 0.1)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h4 style={{ color: '#a3c9a8', margin: 0, fontFamily: 'Cinzel Decorative', letterSpacing: '1px', display: 'flex', alignItems: 'center' }}><IconTools size={16} style={{marginRight: '8px'}} /> Można wytworzyć:</h4>
+                      <button onClick={() => setMaterialUsages(null)} style={{ background: 'none', border: 'none', color: '#a3c9a8', cursor: 'pointer', fontSize: '1.2rem', padding: '0 5px' }}>✕</button>
+                    </div>
+                    {materialUsages.map((item: any, idx) => (
+                      <div key={item.id} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: idx < materialUsages.length - 1 ? '1px dotted rgba(163, 201, 168, 0.3)' : 'none' }}>
+                        <div style={{ color: '#e8e4c9', fontWeight: 'bold' }}>
+                          {item.name || item.title}
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: '#bcaaa4', marginTop: '4px' }}>
+                          Kategoria: <span style={{color: '#ffd700'}}>Przedmiot {item.rarity ? `(${item.rarity})` : ''}</span>
                         </div>
                       </div>
                     ))}

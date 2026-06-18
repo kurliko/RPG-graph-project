@@ -201,7 +201,7 @@ function App() {
 
   const getNodeColor = (node: Node) => {
     switch (node.label) {
-    case 'Zone': return '#32CD32'; // LimeGreen
+    case 'Zone': return '#228B22'; // ForestGreen (ciemniejsza zieleń)
     case 'NPC': return '#4169E1'; // RoyalBlue
     case 'Monster': return '#B22222'; // Firebrick (ciemniejsza czerwień)
     case 'Item': return '#FFD700'; // Gold

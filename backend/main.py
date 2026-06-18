@@ -228,21 +228,21 @@ def recommend_equipment(monster_id: str):
             s = record['s']
             r2 = record['r2']
             
-            if m and m.element_id not in nodes_dict:
+            if m is not None and m.element_id not in nodes_dict:
                 nodes_dict[m.element_id] = serialize_node(m)
-            if e and e.element_id not in nodes_dict:
+            if e is not None and e.element_id not in nodes_dict:
                 nodes_dict[e.element_id] = serialize_node(e)
-            if w:
+            if w is not None:
                 links.append({"source": w.nodes[0].element_id, "target": w.nodes[1].element_id, "type": w.type, **dict(w.items())})
                 
-            if i and i.element_id not in nodes_dict:
+            if i is not None and i.element_id not in nodes_dict:
                 nodes_dict[i.element_id] = serialize_node(i)
-            if r1:
+            if r1 is not None:
                 links.append({"source": r1.nodes[0].element_id, "target": r1.nodes[1].element_id, "type": r1.type, **dict(r1.items())})
                 
-            if s and s.element_id not in nodes_dict:
+            if s is not None and s.element_id not in nodes_dict:
                 nodes_dict[s.element_id] = serialize_node(s)
-            if r2:
+            if r2 is not None:
                 links.append({"source": r2.nodes[0].element_id, "target": r2.nodes[1].element_id, "type": r2.type, **dict(r2.items())})
                 
     unique_links = {f"{l['source']}-{l['type']}-{l['target']}": l for l in links}

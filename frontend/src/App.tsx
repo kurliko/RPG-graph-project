@@ -96,43 +96,41 @@ const translateDetailKey = (key: string): string => {
   return dict[key] || key;
 };
 
-import iconSearchSrc from './assets/icons/archive-research.svg';
-import iconShieldSrc from './assets/icons/viking-shield.svg';
-import iconSwordsSrc from './assets/icons/crossed-swords.svg';
-import iconToolsSrc from './assets/icons/sword-smithing.svg';
-import iconStartSrc from './assets/icons/compass.svg';
-import iconTargetSrc from './assets/icons/bullseye.svg';
-import iconRefreshSrc from './assets/icons/cycle.svg';
+import iconSearchRaw from './assets/icons/archive-research.svg?raw';
+import iconShieldRaw from './assets/icons/viking-shield.svg?raw';
+import iconSwordsRaw from './assets/icons/crossed-swords.svg?raw';
+import iconToolsRaw from './assets/icons/sword-smithing.svg?raw';
+import iconStartRaw from './assets/icons/compass.svg?raw';
+import iconTargetRaw from './assets/icons/bullseye.svg?raw';
+import iconRefreshRaw from './assets/icons/cycle.svg?raw';
 
-const IconBase = ({ src, size = 16, style = {}, color = 'currentColor' }: any) => (
-  <span style={{
-    display: 'inline-block',
-    width: size,
-    height: size,
-    backgroundColor: color,
-    maskImage: `url(${src})`,
-    WebkitMaskImage: `url(${src})`,
-    maskSize: 'contain',
-    WebkitMaskSize: 'contain',
-    maskRepeat: 'no-repeat',
-    WebkitMaskRepeat: 'no-repeat',
-    maskPosition: 'center',
-    WebkitMaskPosition: 'center',
-    verticalAlign: 'middle',
-    marginTop: '-2px',
-    marginRight: '6px',
-    flexShrink: 0,
-    ...style
-  }} />
+const IconBase = ({ raw, size = 16, style = {}, color = 'currentColor' }: any) => (
+  <span
+    className="rpg-icon"
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: size,
+      height: size,
+      color: color,
+      verticalAlign: 'middle',
+      marginTop: '-2px',
+      marginRight: '6px',
+      flexShrink: 0,
+      ...style
+    }}
+    dangerouslySetInnerHTML={{ __html: raw }}
+  />
 );
 
-const IconSearch = ({ size = 16, style = {} }) => <IconBase src={iconSearchSrc} size={size} style={style} />;
-const IconStart = () => <IconBase src={iconStartSrc} size={16} />;
-const IconTarget = () => <IconBase src={iconTargetSrc} size={16} />;
-const IconShield = ({ size = 24, style = {} }) => <IconBase src={iconShieldSrc} size={size} style={{marginRight: '5px', ...style}} />;
-const IconRefresh = () => <IconBase src={iconRefreshSrc} size={16} />;
-const IconSwords = ({ size = 16, style = {} }) => <IconBase src={iconSwordsSrc} size={size} style={style} />;
-const IconTools = ({ size = 16, style = {} }) => <IconBase src={iconToolsSrc} size={size} style={style} />;
+const IconSearch = ({ size = 16, style = {} }) => <IconBase raw={iconSearchRaw} size={size} style={style} />;
+const IconStart = () => <IconBase raw={iconStartRaw} size={16} />;
+const IconTarget = () => <IconBase raw={iconTargetRaw} size={16} />;
+const IconShield = ({ size = 24, style = {} }) => <IconBase raw={iconShieldRaw} size={size} style={{marginRight: '5px', ...style}} />;
+const IconRefresh = () => <IconBase raw={iconRefreshRaw} size={16} />;
+const IconSwords = ({ size = 16, style = {} }) => <IconBase raw={iconSwordsRaw} size={size} style={style} />;
+const IconTools = ({ size = 16, style = {} }) => <IconBase raw={iconToolsRaw} size={size} style={style} />;
 
 function App() {
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });

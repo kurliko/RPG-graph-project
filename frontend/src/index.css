@@ -256,10 +256,28 @@ body {
 }
 
 .expand-btn {
-  background-color: #1a3322;
+  background-color: rgba(58, 40, 0, 0.4);
+  color: #d4af37;
+  border: 1px solid rgba(212, 175, 55, 0.3);
 }
+
 .expand-btn:hover {
-  background-color: #24472f;
+  background-color: rgba(212, 175, 55, 0.15);
+  border-color: #d4af37;
+}
+
+/* Style dla wstrzykiwanych surowych ikon SVG */
+.rpg-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.rpg-icon svg path, 
+.rpg-icon svg rect, 
+.rpg-icon svg circle, 
+.rpg-icon svg polygon {
+  fill: currentColor !important;
 }
 
 .close-btn {

@@ -117,6 +117,10 @@
     
     { "source": "s1", "target": "el3", "type": "USES_ELEMENT" },
     { "source": "s2", "target": "el3", "type": "USES_ELEMENT" },
-    { "source": "s6", "target": "el1", "type": "USES_ELEMENT" }
+    { "source": "s6", "target": "el1", "type": "USES_ELEMENT" },
+    
+    { "source": "n3", "target": "s3", "type": "TEACHES" },
+    { "source": "n1", "target": "s4", "type": "TEACHES" },
+    { "source": "q2", "target": "z8", "type": "TAKES_PLACE_IN" }
   ]
 }

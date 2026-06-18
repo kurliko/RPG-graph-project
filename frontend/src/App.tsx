@@ -96,13 +96,43 @@ const translateDetailKey = (key: string): string => {
   return dict[key] || key;
 };
 
-const IconSearch = ({ size = 16, style = {} }) => <svg viewBox="0 0 24 24" width={size} height={size} stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px', ...style}}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>;
-const IconStart = () => <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px'}}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
-const IconTarget = () => <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px'}}><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>;
-const IconShield = ({ size = 24, style = {} }) => <svg viewBox="0 0 24 24" width={size} height={size} stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '5px', ...style}}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>;
-const IconRefresh = () => <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px'}}><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>;
-const IconSwords = ({ size = 16, style = {} }) => <svg viewBox="0 0 24 24" width={size} height={size} stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px', ...style}}><polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5"></polyline><line x1="13" y1="19" x2="19" y2="13"></line><line x1="16" y1="16" x2="20" y2="20"></line><line x1="19" y1="21" x2="21" y2="19"></line><polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5"></polyline><line x1="5" y1="14" x2="9" y2="18"></line><line x1="7" y1="17" x2="4" y2="20"></line><line x1="3" y1="19" x2="5" y2="21"></line></svg>;
-const IconTools = ({ size = 16, style = {} }) => <svg viewBox="0 0 24 24" width={size} height={size} stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px', ...style}}><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>;
+import iconSearchSrc from './assets/icons/archive-research.svg';
+import iconShieldSrc from './assets/icons/viking-shield.svg';
+import iconSwordsSrc from './assets/icons/crossed-swords.svg';
+import iconToolsSrc from './assets/icons/sword-smithing.svg';
+import iconStartSrc from './assets/icons/compass.svg';
+import iconTargetSrc from './assets/icons/bullseye.svg';
+import iconRefreshSrc from './assets/icons/cycle.svg';
+
+const IconBase = ({ src, size = 16, style = {}, color = 'currentColor' }: any) => (
+  <span style={{
+    display: 'inline-block',
+    width: size,
+    height: size,
+    backgroundColor: color,
+    maskImage: `url(${src})`,
+    WebkitMaskImage: `url(${src})`,
+    maskSize: 'contain',
+    WebkitMaskSize: 'contain',
+    maskRepeat: 'no-repeat',
+    WebkitMaskRepeat: 'no-repeat',
+    maskPosition: 'center',
+    WebkitMaskPosition: 'center',
+    verticalAlign: 'middle',
+    marginTop: '-2px',
+    marginRight: '6px',
+    flexShrink: 0,
+    ...style
+  }} />
+);
+
+const IconSearch = ({ size = 16, style = {} }) => <IconBase src={iconSearchSrc} size={size} style={style} />;
+const IconStart = () => <IconBase src={iconStartSrc} size={16} />;
+const IconTarget = () => <IconBase src={iconTargetSrc} size={16} />;
+const IconShield = ({ size = 24, style = {} }) => <IconBase src={iconShieldSrc} size={size} style={{marginRight: '5px', ...style}} />;
+const IconRefresh = () => <IconBase src={iconRefreshSrc} size={16} />;
+const IconSwords = ({ size = 16, style = {} }) => <IconBase src={iconSwordsSrc} size={size} style={style} />;
+const IconTools = ({ size = 16, style = {} }) => <IconBase src={iconToolsSrc} size={size} style={style} />;
 
 function App() {
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });

@@ -96,11 +96,13 @@ const translateDetailKey = (key: string): string => {
   return dict[key] || key;
 };
 
-const IconSearch = () => <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px'}}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>;
+const IconSearch = ({ size = 16, style = {} }) => <svg viewBox="0 0 24 24" width={size} height={size} stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px', ...style}}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>;
 const IconStart = () => <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px'}}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
 const IconTarget = () => <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px'}}><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>;
-const IconShield = () => <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '5px'}}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>;
+const IconShield = ({ size = 24, style = {} }) => <svg viewBox="0 0 24 24" width={size} height={size} stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '5px', ...style}}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>;
 const IconRefresh = () => <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px'}}><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>;
+const IconSwords = ({ size = 16, style = {} }) => <svg viewBox="0 0 24 24" width={size} height={size} stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px', ...style}}><polyline points="14.5 17.5 3 6 5.5 3.5 17 15 14.5 17.5"></polyline><line x1="21" y1="3" x2="15" y2="9"></line><line x1="16.5" y1="7.5" x2="14" y2="10"></line><line x1="19.5" y1="10.5" x2="17" y2="13"></line><polyline points="9.5 14.5 21 3 18.5 0.5 7 12 9.5 14.5"></polyline></svg>;
+const IconTools = ({ size = 16, style = {} }) => <svg viewBox="0 0 24 24" width={size} height={size} stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '6px', verticalAlign: 'middle', marginTop: '-2px', ...style}}><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>;
 
 function App() {
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
@@ -489,19 +491,19 @@ function App() {
             
             <ul style={{ listStyleType: 'none', padding: 0, marginBottom: '30px' }}>
               <li style={{ marginBottom: '15px', display: 'flex', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '1.2rem', marginRight: '10px' }}>🔍</span>
+                <div style={{ flexShrink: 0, width: '28px' }}><IconSearch size={22} style={{ color: '#a3c9a8' }} /></div>
                 <div><strong>Eksploracja i Wyszukiwanie:</strong> Poruszaj się po interaktywnym grafie i korzystaj z paska wyszukiwania, by szybko namierzyć interesujące Cię potwory, postacie czy przedmioty.</div>
               </li>
               <li style={{ marginBottom: '15px', display: 'flex', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '1.2rem', marginRight: '10px' }}>🛡️</span>
+                <div style={{ flexShrink: 0, width: '28px' }}><IconShield size={22} style={{ color: '#a3c9a8' }} /></div>
                 <div><strong>Analiza Walki:</strong> Kliknij potwora, aby odkryć jego ukryte słabości i odporności na różne żywioły.</div>
               </li>
               <li style={{ marginBottom: '15px', display: 'flex', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '1.2rem', marginRight: '10px' }}>⚔️</span>
+                <div style={{ flexShrink: 0, width: '28px' }}><IconSwords size={22} style={{ color: '#a3c9a8' }} /></div>
                 <div><strong>Rekomendacje Wyposażenia:</strong> Użyj silnika rekomendacji, który przeszuka graf, by zasugerować najlepszą dostępną broń i magię na wybranego wroga.</div>
               </li>
               <li style={{ marginBottom: '15px', display: 'flex', alignItems: 'flex-start' }}>
-                <span style={{ fontSize: '1.2rem', marginRight: '10px' }}>🛠️</span>
+                <div style={{ flexShrink: 0, width: '28px' }}><IconTools size={22} style={{ color: '#a3c9a8' }} /></div>
                 <div><strong>Kalkulator Craftingu:</strong> Znalazłeś potężną broń? Zobacz jej "Przepis", a silnik rekurencyjnie wskaże Ci, u jakich potworów szukać materiałów do jej wytworzenia.</div>
               </li>
             </ul>
@@ -680,12 +682,12 @@ function App() {
                 </button>
                 {selectedNode.label === 'Monster' && (
                   <button className="action-button" style={{backgroundColor: '#4a1515', color: '#ffb3b3', marginTop: '10px'}} onClick={handleRecommend}>
-                    ⚔️ Znajdź wyposażenie na potwora
+                    <IconSwords /> Znajdź wyposażenie na potwora
                   </button>
                 )}
                 {selectedNode.label === 'Item' && (
                   <button className="action-button expand-btn" style={{backgroundColor: '#3a2800', color: '#d4af37', marginTop: '10px', border: '1px solid #d4af37'}} onClick={() => handleShowRecipe(selectedNode)}>
-                    🛠️ Pokaż jak stworzyć (Przepis)
+                    <IconTools /> Pokaż jak stworzyć (Przepis)
                   </button>
                 )}
                 
@@ -694,7 +696,7 @@ function App() {
                     <h4 style={{ color: '#d4af37', margin: '0 0 12px 0', fontFamily: 'Cinzel Decorative', letterSpacing: '1px' }}>Zalecany Ekwipunek:</h4>
                     {recommendedEquipment.map(item => (
                       <div key={item.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px dotted rgba(212, 175, 55, 0.3)' }}>
-                        <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>⚔️</span>
+                        <span style={{ marginRight: '8px', display: 'flex', color: '#d4af37' }}><IconSwords size={18} style={{margin: 0}} /></span>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                           <span style={{ color: '#e8e4c9', fontWeight: 600, fontSize: '0.95rem' }}>{item.name || item.title}</span>
                           <span style={{ color: '#a3c9a8', fontSize: '0.75rem', textTransform: 'uppercase' }}>{translateLabel(item.label as string)}</span>
@@ -702,10 +704,10 @@ function App() {
                         {item.label === 'Item' && (
                           <button 
                             className="recipe-btn"
-                            style={{ marginLeft: 'auto', backgroundColor: '#3a2800', border: '1px solid #d4af37', color: '#d4af37', fontSize: '0.75rem', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Cinzel Decorative' }}
+                            style={{ marginLeft: 'auto', backgroundColor: '#3a2800', border: '1px solid #d4af37', color: '#d4af37', fontSize: '0.75rem', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Cinzel Decorative', display: 'flex', alignItems: 'center' }}
                             onClick={(e) => { e.stopPropagation(); handleShowRecipe(item); }}
                           >
-                            🛠️ Przepis
+                            <IconTools size={12} /> Przepis
                           </button>
                         )}
                       </div>
@@ -716,7 +718,7 @@ function App() {
                 {activeRecipe && (
                   <div style={{ marginTop: '15px', border: '1px solid #7cb342', padding: '15px', borderRadius: '8px', backgroundColor: 'rgba(124, 179, 66, 0.1)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                      <h4 style={{ color: '#aed581', margin: 0, fontFamily: 'Cinzel Decorative', letterSpacing: '1px' }}>🛠️ Składniki: {recipeItemName}</h4>
+                      <h4 style={{ color: '#aed581', margin: 0, fontFamily: 'Cinzel Decorative', letterSpacing: '1px', display: 'flex', alignItems: 'center' }}><IconTools size={16} /> Składniki: {recipeItemName}</h4>
                       <button onClick={() => setActiveRecipe(null)} style={{ background: 'none', border: 'none', color: '#aed581', cursor: 'pointer', fontSize: '1.2rem', padding: '0 5px' }}>✕</button>
                     </div>
                     {activeRecipe.map((ingred, idx) => (

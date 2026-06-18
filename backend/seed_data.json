@@ -121,6 +121,8 @@
     
     { "source": "n3", "target": "s3", "type": "TEACHES" },
     { "source": "n1", "target": "s4", "type": "TEACHES" },
-    { "source": "q2", "target": "z8", "type": "TAKES_PLACE_IN" }
+    { "source": "q2", "target": "z8", "type": "TAKES_PLACE_IN" },
+    
+    { "source": "m4", "target": "s6", "type": "UNLOCKS" }
   ]
 }

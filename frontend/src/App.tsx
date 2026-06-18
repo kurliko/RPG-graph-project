@@ -201,16 +201,16 @@ function App() {
 
   const getNodeColor = (node: Node) => {
     switch (node.label) {
-      case 'Item': return '#FFD700';
-      case 'Material': return '#C0C0C0';
-      case 'Monster': return '#FF4500';
-      case 'NPC': return '#1E90FF';
-      case 'Zone': return '#32CD32';
-      case 'Quest': return '#9370DB';
-      case 'Skill': return '#FF1493';
-      case 'Element': return node.color || '#00FFFF';
-      default: return '#A9A9A9';
-    }
+    case 'Zone': return '#32CD32'; // LimeGreen
+    case 'NPC': return '#4169E1'; // RoyalBlue
+    case 'Monster': return '#B22222'; // Firebrick (ciemniejsza czerwień)
+    case 'Item': return '#FFD700'; // Gold
+    case 'Material': return '#A9A9A9'; // DarkGray
+    case 'Quest': return '#9370DB'; // MediumPurple
+    case 'Skill': return '#FF1493'; // DeepPink
+    case 'Element': return node.color || '#00FFFF'; // Zależny od elementu (Ogień to #FF4500)
+    default: return '#FFFFFF';
+  }
   };
 
   const handleDoubleClickExpand = async (node: Node) => {

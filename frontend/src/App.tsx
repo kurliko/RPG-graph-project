@@ -153,6 +153,8 @@ function App() {
   const [recommendedEquipment, setRecommendedEquipment] = useState<Node[]>([]);
   const [activeRecipe, setActiveRecipe] = useState<any[] | null>(null);
   const [recipeItemName, setRecipeItemName] = useState<string>('');
+  const [activeObtainInfo, setActiveObtainInfo] = useState<any[] | null>(null);
+  const [obtainSkillName, setObtainSkillName] = useState<string>('');
   const [showWelcome, setShowWelcome] = useState<boolean>(true);
   
   // Referencje do śledzenia podwójnego kliknięcia i efektów poświaty
@@ -295,6 +297,7 @@ function App() {
         if (selectedNode?.id !== node.id) {
           setRecommendedEquipment([]); // Wyczyść rekomendacje przy zmianie węzła
           setActiveRecipe(null); // Wyczyść przepis
+          setActiveObtainInfo(null); // Wyczyść źródło
         }
         
         let nodeData = { ...node };
@@ -489,12 +492,29 @@ function App() {
       if (res.data.recipe && res.data.recipe.length > 0) {
         setActiveRecipe(res.data.recipe);
         setRecipeItemName((item.name || item.title || 'Przedmiot') as string);
+        setActiveObtainInfo(null);
       } else {
         alert("Ten przedmiot nie posiada znanego schematu craftingu (może wylecieć jako cały przedmiot).");
       }
     } catch (e) {
       console.error(e);
       alert("Błąd podczas pobierania przepisu z bazy.");
+    }
+  };
+
+  const handleShowObtain = async (skill: Node) => {
+    try {
+      const res = await axios.get(`http://localhost:8000/api/obtain/${encodeURIComponent(skill.id as string)}`);
+      if (res.data.sources && res.data.sources.length > 0) {
+        setActiveObtainInfo(res.data.sources);
+        setObtainSkillName((skill.name || skill.title || 'Umiejętność') as string);
+        setActiveRecipe(null);
+      } else {
+        alert("Brak informacji o tym, jak zdobyć tę umiejętność.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Błąd podczas pobierania informacji o źródle.");
     }
   };
 
@@ -749,6 +769,11 @@ function App() {
                     <IconTools /> Pokaż jak stworzyć (Przepis)
                   </button>
                 )}
+                {selectedNode.label === 'Skill' && (
+                  <button className="action-button expand-btn" style={{backgroundColor: '#101d2b', color: '#58a6ff', marginTop: '10px', border: '1px solid #58a6ff'}} onClick={() => handleShowObtain(selectedNode)}>
+                    <IconSearch /> Pokaż jak zdobyć
+                  </button>
+                )}
                 
                 {recommendedEquipment.length > 0 && (
                   <div style={{ marginTop: '15px', border: '1px solid #d4af37', padding: '15px', borderRadius: '8px', backgroundColor: 'rgba(212, 175, 55, 0.05)' }}>
@@ -767,6 +792,15 @@ function App() {
                             onClick={(e) => { e.stopPropagation(); handleShowRecipe(item); }}
                           >
                             <IconTools size={12} /> Przepis
+                          </button>
+                        )}
+                        {item.label === 'Skill' && (
+                          <button 
+                            className="recipe-btn"
+                            style={{ marginLeft: 'auto', backgroundColor: '#101d2b', border: '1px solid #58a6ff', color: '#58a6ff', fontSize: '0.75rem', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Cinzel Decorative', display: 'flex', alignItems: 'center' }}
+                            onClick={(e) => { e.stopPropagation(); handleShowObtain(item); }}
+                          >
+                            <IconSearch size={12} /> Jak zdobyć
                           </button>
                         )}
                       </div>
@@ -794,6 +828,25 @@ function App() {
                             Nieznane źródło (poszukaj u legendarnych rzemieślników)
                           </div>
                         )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {activeObtainInfo && (
+                  <div style={{ marginTop: '15px', border: '1px solid #58a6ff', padding: '15px', borderRadius: '8px', backgroundColor: 'rgba(88, 166, 255, 0.1)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                      <h4 style={{ color: '#58a6ff', margin: 0, fontFamily: 'Cinzel Decorative', letterSpacing: '1px', display: 'flex', alignItems: 'center' }}><IconSearch size={16} /> Źródło: {obtainSkillName}</h4>
+                      <button onClick={() => setActiveObtainInfo(null)} style={{ background: 'none', border: 'none', color: '#58a6ff', cursor: 'pointer', fontSize: '1.2rem', padding: '0 5px' }}>✕</button>
+                    </div>
+                    {activeObtainInfo.map((src, idx) => (
+                      <div key={idx} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: idx < activeObtainInfo.length - 1 ? '1px dotted rgba(88, 166, 255, 0.3)' : 'none' }}>
+                        <div style={{ color: '#e8e4c9', fontWeight: 'bold' }}>
+                          {src.name} <span style={{fontSize: '0.75rem', color: '#a3c9a8', fontWeight: 'normal'}}>({translateLabel(src.label)})</span>
+                        </div>
+                        <div style={{ fontSize: '0.8rem', color: '#bcaaa4', marginTop: '4px' }}>
+                          Powiązanie: <span style={{color: '#58a6ff'}}>{translateRelation(src.type)}</span>
+                        </div>
                       </div>
                     ))}
                   </div>

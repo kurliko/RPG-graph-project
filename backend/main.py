@@ -300,3 +300,26 @@ def get_crafting_recipe(item_id: str):
                 "sources": list(set(drops))
             })
     return {"recipe": recipe}
+
+@app.get("/api/obtain/{skill_id}")
+def get_obtain_info(skill_id: str):
+    query = """
+    MATCH (n)-[r:TEACHES|GRANTS_SKILL|UNLOCKS|DROPS]->(s:Skill)
+    WHERE elementId(s) = $skill_id
+    RETURN 
+        elementId(n) as source_id,
+        n.name as source_name,
+        labels(n)[0] as source_label,
+        type(r) as relation_type
+    """
+    results = db.query(query, parameters={"skill_id": skill_id})
+    sources = []
+    if results:
+        for record in results:
+            sources.append({
+                "id": record["source_id"],
+                "name": record["source_name"],
+                "label": record["source_label"],
+                "type": record["relation_type"]
+            })
+    return {"sources": sources}

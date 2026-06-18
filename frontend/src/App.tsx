@@ -561,14 +561,6 @@ function App() {
         <div className="brand">
           RPG Graph
         </div>
-        
-        <button 
-          className="action-button close-btn" 
-          style={{marginLeft: 'auto', padding: '5px 15px'}}
-          onClick={() => window.location.reload()}
-        >
-          <IconRefresh /> Resetuj Graf
-        </button>
 
         <div className="legend">
           {Object.entries(svgStrings).map(([label, svg]) => (
@@ -616,6 +608,25 @@ function App() {
         </div>
         
         <div className="graph-wrapper">
+          {/* Kontrolki mapy w prawym dolnym rogu */}
+          <div style={{ position: 'absolute', bottom: '25px', right: '25px', zIndex: 100 }}>
+            <button 
+              className="action-button close-btn" 
+              style={{ 
+                padding: '10px 20px', 
+                borderRadius: '8px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                boxShadow: '0 4px 15px rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(5px)',
+                backgroundColor: 'rgba(51, 26, 26, 0.85)'
+              }}
+              onClick={() => window.location.reload()}
+            >
+              <IconRefresh /> Resetuj Graf
+            </button>
+          </div>
+
           <ForceGraph2D
             ref={fgRef}
             graphData={data}

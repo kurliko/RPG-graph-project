@@ -16,3 +16,28 @@ services:
       - NEO4J_PLUGINS=["apoc"] 
     restart: unless-stopped
 
+  backend:
+    build: ./backend
+    container_name: rpg-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - NEO4J_URI=neo4j://neo4j:7687
+    depends_on:
+      - neo4j
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: rpg-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    restart: unless-stopped
+

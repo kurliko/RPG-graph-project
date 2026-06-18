@@ -591,12 +591,23 @@ function App() {
 
         <div className="legend">
           {Object.entries(svgStrings).map(([label, svg]) => (
-            <span key={label} style={{ color: getNodeColor({ label } as Node), display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <span 
-                className="rpg-icon"
-                style={{ width: '16px', height: '16px', display: 'inline-block', color: getNodeColor({ label } as Node) }} 
-                dangerouslySetInnerHTML={{ __html: svg }} 
-              />
+            <span key={label} style={{ color: getNodeColor({ label } as Node), display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{
+                width: '24px', 
+                height: '24px', 
+                backgroundColor: getNodeColor({ label } as Node),
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 0 5px rgba(0,0,0,0.5)'
+              }}>
+                <span 
+                  className="rpg-icon"
+                  style={{ width: '16px', height: '16px', display: 'block', color: 'white' }} 
+                  dangerouslySetInnerHTML={{ __html: svg }} 
+                />
+              </span>
               {translateLabel(label)}
             </span>
           ))}

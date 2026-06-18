@@ -255,7 +255,7 @@ def recommend_equipment(monster_id: str):
 @app.get("/api/usages/{material_id}")
 def get_usages(material_id: str):
     query = """
-    MATCH (i:Item)-[r:REQUIRES_MATERIAL]->(m:Material)
+    MATCH (i:Item)-[r:REQUIRES]->(m:Material)
     WHERE elementId(m) = $material_id
     RETURN i, r, m
     """

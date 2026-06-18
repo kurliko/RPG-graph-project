@@ -24,18 +24,26 @@ interface GraphData {
   links: Link[];
 }
 
+import itemNodeRaw from './assets/icons/item-node.svg?raw';
+import materialNodeRaw from './assets/icons/material-node.svg?raw';
+import monsterNodeRaw from './assets/icons/monster-node.svg?raw';
+import npcNodeRaw from './assets/icons/npc-node.svg?raw';
+import zoneNodeRaw from './assets/icons/zone-node.svg?raw';
+import questNodeRaw from './assets/icons/quest-node.svg?raw';
+import skillNodeRaw from './assets/icons/skill-node.svg?raw';
+import elementNodeRaw from './assets/icons/element-node.svg?raw';
+
 const ICONS: Record<string, HTMLImageElement> = {};
 
-// Przygotowanie ikon SVG (kodowane do Base64 dla elementu Image w Canvas)
 const svgStrings: Record<string, string> = {
-  Item: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z"/></svg>',
-  Material: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M6 2L2 8L12 22L22 8L18 2H6ZM6.83 4H17.17L19.5 7.5H4.5L6.83 4ZM12 19L5.45 9.5H18.55L12 19Z"/></svg>',
-  Monster: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8.69 2 6 4.69 6 8V22L8.5 19.5L11 22L13.5 19.5L16 22L18.5 19.5L21 22V8C21 4.69 18.31 2 15 2H12ZM10 10C8.9 10 8 9.1 8 8C8 6.9 8.9 6 10 6C11.1 6 12 6.9 12 8C12 9.1 11.1 10 10 10ZM16 10C14.9 10 14 9.1 14 8C14 6.9 14.9 6 16 6C17.1 6 18 6.9 18 8C18 9.1 17.1 10 16 10Z"/></svg>',
-  NPC: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/></svg>',
-  Zone: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M14 6L10 4V16L14 18M14 6V18M14 6L21 4V16L14 18M10 4L3 6V18L10 16M10 4V16"/></svg>',
-  Quest: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M11 15H13V17H11V15ZM11 7H13V13H11V7ZM12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z"/></svg>',
-  Skill: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M7 2V13H10V22L17 10H13L17 2H7Z"/></svg>',
-  Element: '<svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>'
+  Item: itemNodeRaw,
+  Material: materialNodeRaw,
+  Monster: monsterNodeRaw,
+  NPC: npcNodeRaw,
+  Zone: zoneNodeRaw,
+  Quest: questNodeRaw,
+  Skill: skillNodeRaw,
+  Element: elementNodeRaw
 };
 
 Object.entries(svgStrings).forEach(([key, svg]) => {
@@ -585,8 +593,9 @@ function App() {
           {Object.entries(svgStrings).map(([label, svg]) => (
             <span key={label} style={{ color: getNodeColor({ label } as Node), display: 'flex', alignItems: 'center', gap: '5px' }}>
               <span 
-                style={{ width: '16px', height: '16px', display: 'inline-block' }} 
-                dangerouslySetInnerHTML={{ __html: svg.replace('fill="white"', `fill="${getNodeColor({ label } as Node)}"`) }} 
+                className="rpg-icon"
+                style={{ width: '16px', height: '16px', display: 'inline-block', color: getNodeColor({ label } as Node) }} 
+                dangerouslySetInnerHTML={{ __html: svg }} 
               />
               {translateLabel(label)}
             </span>

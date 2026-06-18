@@ -115,6 +115,7 @@ function App() {
   const [recommendedEquipment, setRecommendedEquipment] = useState<Node[]>([]);
   const [activeRecipe, setActiveRecipe] = useState<any[] | null>(null);
   const [recipeItemName, setRecipeItemName] = useState<string>('');
+  const [showWelcome, setShowWelcome] = useState<boolean>(true);
   
   // Referencje do śledzenia podwójnego kliknięcia i efektów poświaty
   const fgRef = useRef<any>();
@@ -463,6 +464,61 @@ function App() {
 
   return (
     <div className="app-container">
+      {/* Ekran powitalny */}
+      {showWelcome && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', 
+          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(5px)',
+          display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: '#1a1005', border: '2px solid #d4af37', borderRadius: '8px',
+            padding: '40px', maxWidth: '600px', color: '#e8e4c9',
+            boxShadow: '0 0 30px rgba(212, 175, 55, 0.2), inset 0 0 20px rgba(0,0,0,0.8)'
+          }}>
+            <h1 style={{ fontFamily: 'Cinzel Decorative', color: '#d4af37', textAlign: 'center', marginTop: 0, marginBottom: '10px' }}>
+              Witaj w RPG Graph
+            </h1>
+            <h3 style={{ textAlign: 'center', color: '#a3c9a8', marginTop: 0, marginBottom: '30px', fontWeight: 'normal' }}>
+              Interaktywnym Asystencie Nordyckich Wypraw
+            </h3>
+            
+            <p style={{ lineHeight: '1.6', marginBottom: '20px' }}>
+              Ta aplikacja to wizualny silnik bazy danych grafowych (Neo4j), który pozwala na analizę zależności w świecie gry RPG. Użyj grafu, aby zdobyć przewagę w walce i planować swoje rzemiosło.
+            </p>
+            
+            <ul style={{ listStyleType: 'none', padding: 0, marginBottom: '30px' }}>
+              <li style={{ marginBottom: '15px', display: 'flex', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '1.2rem', marginRight: '10px' }}>🔍</span>
+                <div><strong>Eksploracja i Wyszukiwanie:</strong> Poruszaj się po interaktywnym grafie i korzystaj z paska wyszukiwania, by szybko namierzyć interesujące Cię potwory, postacie czy przedmioty.</div>
+              </li>
+              <li style={{ marginBottom: '15px', display: 'flex', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '1.2rem', marginRight: '10px' }}>🛡️</span>
+                <div><strong>Analiza Walki:</strong> Kliknij potwora, aby odkryć jego ukryte słabości i odporności na różne żywioły.</div>
+              </li>
+              <li style={{ marginBottom: '15px', display: 'flex', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '1.2rem', marginRight: '10px' }}>⚔️</span>
+                <div><strong>Rekomendacje Wyposażenia:</strong> Użyj silnika rekomendacji, który przeszuka graf, by zasugerować najlepszą dostępną broń i magię na wybranego wroga.</div>
+              </li>
+              <li style={{ marginBottom: '15px', display: 'flex', alignItems: 'flex-start' }}>
+                <span style={{ fontSize: '1.2rem', marginRight: '10px' }}>🛠️</span>
+                <div><strong>Kalkulator Craftingu:</strong> Znalazłeś potężną broń? Zobacz jej "Przepis", a silnik rekurencyjnie wskaże Ci, u jakich potworów szukać materiałów do jej wytworzenia.</div>
+              </li>
+            </ul>
+            
+            <div style={{ textAlign: 'center' }}>
+              <button 
+                className="action-button"
+                style={{ backgroundColor: '#3a2800', border: '1px solid #d4af37', color: '#d4af37', padding: '12px 24px', fontSize: '1.1rem', fontFamily: 'Cinzel Decorative', cursor: 'pointer', transition: 'all 0.2s' }}
+                onClick={() => setShowWelcome(false)}
+              >
+                Rozpocznij Eksplorację
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <header className="app-header">
         <div className="brand">
           RPG Graph

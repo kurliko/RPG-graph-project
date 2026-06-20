@@ -1,224 +1,125 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import axios from 'axios';
-import ForceGraph2D from 'react-force-graph-2d';
 import './index.css';
 
-interface Node {
-  id: string;
-  label: string;
-  name?: string;
-  title?: string;
-  game_id?: string;
-  [key: string]: any;
-}
+// Types and APIs
+import type { Node, GraphData } from './types';
+import { api } from './services/api';
 
-interface Link {
-  source: string | Node;
-  target: string | Node;
-  type: string;
-  [key: string]: any;
-}
+// Utils
+import { translateLabel, translateRelation, translateDetailKey, getNodeColor } from './utils/graphUtils';
 
-interface GraphData {
-  nodes: Node[];
-  links: Link[];
-}
-
-import itemNodeRaw from './assets/icons/item-node.svg?raw';
-import materialNodeRaw from './assets/icons/material-node.svg?raw';
-import monsterNodeRaw from './assets/icons/monster-node.svg?raw';
-import npcNodeRaw from './assets/icons/npc-node.svg?raw';
-import zoneNodeRaw from './assets/icons/zone-node.svg?raw';
-import questNodeRaw from './assets/icons/quest-node.svg?raw';
-import skillNodeRaw from './assets/icons/skill-node.svg?raw';
-import elementNodeRaw from './assets/icons/element-node.svg?raw';
-
-const ICONS: Record<string, HTMLImageElement> = {};
-
-const svgStrings: Record<string, string> = {
-  Item: itemNodeRaw,
-  Material: materialNodeRaw,
-  Monster: monsterNodeRaw,
-  NPC: npcNodeRaw,
-  Zone: zoneNodeRaw,
-  Quest: questNodeRaw,
-  Skill: skillNodeRaw,
-  Element: elementNodeRaw
-};
-
-Object.entries(svgStrings).forEach(([key, svg]) => {
-  const img = new Image();
-  img.src = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-  ICONS[key] = img;
-});
-
-// Słowniki tłumaczeń dla interfejsu użytkownika
-const translateLabel = (label: string): string => {
-  const dict: Record<string, string> = {
-    'Item': 'Przedmiot',
-    'Material': 'Materiał',
-    'Monster': 'Potwór',
-    'NPC': 'Postać (NPC)',
-    'Zone': 'Lokalizacja',
-    'Quest': 'Zadanie',
-    'Skill': 'Umiejętność',
-    'Element': 'Żywioł'
-  };
-  return dict[label] || label;
-};
-
-const translateRelation = (type: string): string => {
-  const dict: Record<string, string> = {
-    'RESIDES_IN': 'Zamieszkuje',
-    'SPAWNS_IN': 'Pojawia się w',
-    'GIVES': 'Zleca',
-    'TAKES_PLACE_IN': 'Odbywa się w',
-    'PRE_REQUISITE': 'Wymaga',
-    'REQUIRES': 'Potrzebuje',
-    'DROPS': 'Upuszcza',
-    'UNLOCKS': 'Odblokowuje',
-    'TEACHES': 'Uczy',
-    'GRANTS_SKILL': 'Daje umiejętność',
-    'USES_SKILL': 'Używa',
-    'WEAK_AGAINST': 'Wrażliwy na',
-    'RESISTANT_TO': 'Odporny na',
-    'IMBUED_WITH': 'Nasycony',
-    'USES_ELEMENT': 'Wykorzystuje'
-  };
-  return dict[type] || type;
-};
-
-const translateDetailKey = (key: string): string => {
-  const dict: Record<string, string> = {
-    'details': 'Opis',
-    'min_level': 'Min. poziom',
-    'level': 'Poziom',
-    'faction': 'Frakcja',
-    'category': 'Kategoria',
-    'rarity': 'Rzadkość',
-    'exp_reward': 'Nagroda EXP',
-    'weaknesses': 'Wrażliwość',
-    'resistances': 'Odporność',
-    'cooldown': 'Czas Odnowienia'
-  };
-  return dict[key] || key;
-};
-
-import iconSearchRaw from './assets/icons/archive-research.svg?raw';
-import iconShieldRaw from './assets/icons/viking-shield.svg?raw';
-import iconSwordsRaw from './assets/icons/crossed-swords.svg?raw';
-import iconToolsRaw from './assets/icons/sword-smithing.svg?raw';
-import iconStartRaw from './assets/icons/compass.svg?raw';
-import iconTargetRaw from './assets/icons/bullseye.svg?raw';
-import iconRefreshRaw from './assets/icons/cycle.svg?raw';
-
-const IconBase = ({ raw, size = 16, style = {}, color = 'currentColor' }: any) => (
-  <span
-    className="rpg-icon"
-    style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: size,
-      height: size,
-      color: color,
-      verticalAlign: 'middle',
-      marginTop: '-2px',
-      marginRight: '6px',
-      flexShrink: 0,
-      ...style
-    }}
-    dangerouslySetInnerHTML={{ __html: raw }}
-  />
-);
-
-const IconSearch = ({ size = 16, style = {} }) => <IconBase raw={iconSearchRaw} size={size} style={style} />;
-const IconStart = () => <IconBase raw={iconStartRaw} size={16} />;
-const IconTarget = () => <IconBase raw={iconTargetRaw} size={16} />;
-const IconShield = ({ size = 24, style = {} }) => <IconBase raw={iconShieldRaw} size={size} style={{marginRight: '5px', ...style}} />;
-const IconRefresh = () => <IconBase raw={iconRefreshRaw} size={16} />;
-const IconSwords = ({ size = 16, style = {} }) => <IconBase raw={iconSwordsRaw} size={size} style={style} />;
-const IconTools = ({ size = 16, style = {} }) => <IconBase raw={iconToolsRaw} size={size} style={style} />;
+// Components
+import { IconRefresh, IconTools, IconStart, IconTarget, IconSearch, IconSwords, IconShield } from './components/icons';
+import { SearchBar } from './components/SearchBar';
+import { GraphViewer, getSvgStrings } from './components/GraphViewer';
+import { Sidebar } from './components/Sidebar/Sidebar';
+import { NodeDetails } from './components/Sidebar/NodeDetails';
+import { Pathfinder } from './components/Sidebar/Pathfinder';
+import { GMEditor } from './components/Sidebar/GMEditor';
 
 function App() {
   const [data, setData] = useState<GraphData>({ nodes: [], links: [] });
   const [loading, setLoading] = useState(true);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  
+  // Search state
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Node[]>([]);
+  
+  // Pathfinder state
   const [pathSource, setPathSource] = useState<Node | null>(null);
   const [pathTarget, setPathTarget] = useState<Node | null>(null);
   const [pathNodes, setPathNodes] = useState<Set<string>>(new Set());
   const [pathLinks, setPathLinks] = useState<Set<string>>(new Set());
+  
+  // Detail Panels
   const [recommendedEquipment, setRecommendedEquipment] = useState<Node[]>([]);
   const [activeRecipe, setActiveRecipe] = useState<any[] | null>(null);
   const [recipeItemName, setRecipeItemName] = useState<string>('');
   const [activeObtainInfo, setActiveObtainInfo] = useState<any[] | null>(null);
   const [obtainSkillName, setObtainSkillName] = useState<string>('');
   const [materialUsages, setMaterialUsages] = useState<any[] | null>(null);
-  const [showWelcome, setShowWelcome] = useState<boolean>(true);
   
-  // Referencje do śledzenia podwójnego kliknięcia i efektów poświaty
+  const [showWelcome, setShowWelcome] = useState<boolean>(true);
+
+  // GM Mode State
+  const [isGMMode, setIsGMMode] = useState<boolean>(false);
+  const [linkingState, setLinkingState] = useState<{ active: boolean, targetLabel: string }>({ active: false, targetLabel: "" });
+  const [nodeFormData, setNodeFormData] = useState<any>({});
+  const [newNodeLabel, setNewNodeLabel] = useState<string>("Monster");
+  
+  useEffect(() => {
+    if (selectedNode) {
+      const data = { ...selectedNode };
+      delete data.x; delete data.y; delete data.vx; delete data.vy; delete data.index; delete data.color;
+      setNodeFormData(data);
+    } else {
+      setNodeFormData({});
+    }
+  }, [selectedNode]);
+  
+  // References
   const fgRef = useRef<any>();
   const clickTimeout = useRef<any>(null);
   const lastClickedNode = useRef<string | null>(null);
   const highlightsRef = useRef<{id: string, timestamp: number}[]>([]);
 
-  // Inicjalne załadowanie grafu
+  // Load Graph
   useEffect(() => {
-    axios.get('http://localhost:8000/api/graph')
-      .then(response => {
-        setData(response.data);
+    api.getGraph()
+      .then(graphData => {
+        setData(graphData);
         setLoading(false);
       })
       .catch(error => {
-        console.error("Błąd API:", error);
+        console.error("API Error:", error);
         setLoading(false);
       });
   }, []);
 
-  // Endpoint do ekspansji (rozszerzania) węzła
-  const handleExpandNode = async () => {
-    if (!selectedNode) return;
-    
+  // --- Handlers ---
+  const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
     try {
-      const res = await axios.get(`http://localhost:8000/api/nodes/${encodeURIComponent(selectedNode.id)}/expand`);
-      const { nodes: newNodes, links: newLinks } = res.data;
-      
-      setData({
-        nodes: newNodes,
-        links: newLinks
-      });
-      
-      // Możemy też wycentrować graf ponownie, żeby się ładnie ułożył
-      setTimeout(() => {
-        fgRef.current.zoomToFit(1000, 50);
-      }, 300);
-      
+      const nodes = await api.searchNodes(query);
+      setSearchResults(nodes);
     } catch (error) {
-      console.error("Błąd podczas rozszerzania węzła:", error);
+      console.error(error);
     }
   };
 
-  const getNodeColor = (node: Node) => {
-    switch (node.label) {
-    case 'Zone': return '#228B22'; // ForestGreen (ciemniejsza zieleń)
-    case 'NPC': return '#4169E1'; // RoyalBlue
-    case 'Monster': return '#B22222'; // Firebrick (ciemniejsza czerwień)
-    case 'Item': return '#FFD700'; // Gold
-    case 'Material': return '#A9A9A9'; // DarkGray
-    case 'Quest': return '#9370DB'; // MediumPurple
-    case 'Skill': return '#FF1493'; // DeepPink
-    case 'Element': return node.color || '#00FFFF'; // Zależny od elementu (Ogień to #FF4500)
-    default: return '#FFFFFF';
-  }
+  const handleSelectSearchResult = (nodeId: string) => {
+    setSearchQuery("");
+    setSearchResults([]);
+    const targetNode = data.nodes.find(n => n.id === nodeId);
+    if (targetNode) {
+      setSelectedNode(targetNode);
+      if (targetNode.x !== undefined && targetNode.y !== undefined && fgRef.current) {
+        fgRef.current.centerAt(targetNode.x, targetNode.y, 1000);
+        fgRef.current.zoom(2, 1000);
+      }
+    }
+  };
+
+  const handleExpandNode = async () => {
+    if (!selectedNode) return;
+    try {
+      const { nodes: newNodes, links: newLinks } = await api.expandNode(selectedNode.id as string);
+      setData({ nodes: newNodes, links: newLinks });
+      setTimeout(() => { if (fgRef.current) fgRef.current.zoomToFit(1000, 50); }, 300);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleDoubleClickExpand = async (node: Node) => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/nodes/${encodeURIComponent(node.id)}/expand`);
-      const { nodes: newNodes, links: newLinks } = res.data;
-      
+      const { nodes: newNodes, links: newLinks } = await api.expandNode(node.id as string);
       const newAddedIds = new Set<string>();
       const nodeMap = new Map(data.nodes.map(n => [n.id, n]));
       const combinedNodes = [...data.nodes];
@@ -227,173 +128,116 @@ function App() {
         if (!nodeMap.has(n.id)) {
           n.x = node.x !== undefined ? node.x + (Math.random() * 10 - 5) : 0;
           n.y = node.y !== undefined ? node.y + (Math.random() * 10 - 5) : 0;
-          n.vx = 0;
-          n.vy = 0;
+          n.vx = 0; n.vy = 0;
           nodeMap.set(n.id, n);
           newAddedIds.add(n.id as string);
           combinedNodes.push(n);
         }
       });
       
-      const linkMap = new Map(data.links.map(l => {
-        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
-        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
-        return [`${sourceId}-${l.type}-${targetId}`, l];
+      const linkMap = new Set(data.links.map(l => {
+        const s = typeof l.source === 'object' ? l.source.id : l.source;
+        const t = typeof l.target === 'object' ? l.target.id : l.target;
+        return `${s}-${l.type}-${t}`;
       }));
-      
       const combinedLinks = [...data.links];
-      newLinks.forEach((l: Link) => {
-        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
-        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
-        const key = `${sourceId}-${l.type}-${targetId}`;
-        if (!linkMap.has(key)) {
-          linkMap.set(key, l);
+      
+      newLinks.forEach((l: any) => {
+        const s = typeof l.source === 'object' ? l.source.id : l.source;
+        const t = typeof l.target === 'object' ? l.target.id : l.target;
+        if (!linkMap.has(`${s}-${l.type}-${t}`)) {
           combinedLinks.push(l);
         }
       });
-
-      setData({
-        nodes: combinedNodes,
-        links: combinedLinks
+      
+      highlightsRef.current = highlightsRef.current.filter(h => Date.now() - h.timestamp < 2500);
+      newAddedIds.forEach(id => {
+        highlightsRef.current.push({ id, timestamp: Date.now() });
       });
 
-      if (newAddedIds.size > 0) {
-        const now = Date.now();
-        const newHighlights = Array.from(newAddedIds).map(id => ({ id, timestamp: now }));
-        highlightsRef.current = [...highlightsRef.current, ...newHighlights];
-        
-        setTimeout(() => {
-           highlightsRef.current = highlightsRef.current.filter(h => Date.now() - h.timestamp < 3000);
-        }, 3000);
-      } else {
-        // Dajmy feedback nawet jeśli nie pobrano nowych węzłów (podświetl sam węzeł główny)
-        const now = Date.now();
-        highlightsRef.current = [...highlightsRef.current, { id: node.id as string, timestamp: now }];
-        setTimeout(() => {
-           highlightsRef.current = highlightsRef.current.filter(h => Date.now() - h.timestamp < 3000);
-        }, 3000);
-      }
-      
-      // Wymuś podgrzanie symulacji, by klatki animacji poświaty nie zamarzały
-      if (fgRef.current) {
-        fgRef.current.d3ReheatSimulation();
-      }
-      
+      setData({ nodes: combinedNodes, links: combinedLinks });
     } catch (error) {
-      console.error("Błąd podczas rozszerzania węzła:", error);
+      console.error("Double click expand error", error);
     }
   };
 
-  const handleNodeClick = useCallback((node: Node) => {
-    if (lastClickedNode.current === node.id && clickTimeout.current) {
-      // Wykryto podwójne kliknięcie
-      clearTimeout(clickTimeout.current);
-      clickTimeout.current = null;
+  const handleNodeClick = useCallback(async (node: Node) => {
+    if (isGMMode && linkingState.active && selectedNode) {
+      try {
+        await api.createLink(selectedNode.id as string, node.id as string, linkingState.targetLabel || 'RELATES_TO', {});
+        setData(prev => ({
+          ...prev,
+          links: [...prev.links, { source: selectedNode.id, target: node.id, type: linkingState.targetLabel || 'RELATES_TO' }]
+        }));
+        setLinkingState({ active: false, targetLabel: "" });
+      } catch (e) {
+        console.error(e);
+        alert("Failed to create link.");
+      }
+      return;
+    }
+
+    if (lastClickedNode.current === node.id) {
+      if (clickTimeout.current) clearTimeout(clickTimeout.current);
       lastClickedNode.current = null;
       handleDoubleClickExpand(node);
-    } else {
-      // Pojedyncze kliknięcie
-      lastClickedNode.current = node.id as string;
-      clickTimeout.current = setTimeout(async () => {
-        if (selectedNode?.id !== node.id) {
-          setRecommendedEquipment([]); // Wyczyść rekomendacje przy zmianie węzła
-          setActiveRecipe(null); // Wyczyść przepis
-          setActiveObtainInfo(null); // Wyczyść źródło
-          setMaterialUsages(null); // Wyczyść zastosowania
-        }
-        
-        let nodeData = { ...node };
-        
-        // Jeśli kliknięto potwora, dynamicznie dociągamy jego słabości i odporności
-        if (node.label === 'Monster') {
-          try {
-            const res = await axios.get(`http://localhost:8000/api/nodes/${encodeURIComponent(node.id as string)}/details`);
-            if (res.data.weaknesses) nodeData.weaknesses = res.data.weaknesses;
-            if (res.data.resistances) nodeData.resistances = res.data.resistances;
-          } catch(e) {
-            console.error("Błąd podczas pobierania detali węzła", e);
-          }
-        }
-        
-        setSelectedNode(nodeData);
-        fgRef.current.centerAt(nodeData.x, nodeData.y, 1000);
-        fgRef.current.zoom(3, 2000);
-        clickTimeout.current = null;
-        lastClickedNode.current = null;
-      }, 400); // 400ms okienko na łatwiejsze wykonanie podwójnego kliknięcia
+      return;
     }
-  }, [selectedNode]);
-
-  const handleSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const q = e.target.value;
-    setSearchQuery(q);
-    if (q.length > 1) {
-      try {
-        const res = await axios.get(`http://localhost:8000/api/search?q=${encodeURIComponent(q)}`);
-        setSearchResults(res.data.nodes);
-      } catch (error) {
-        console.error("Błąd wyszukiwania:", error);
+    
+    lastClickedNode.current = node.id as string;
+    if (clickTimeout.current) clearTimeout(clickTimeout.current);
+    clickTimeout.current = setTimeout(() => {
+      lastClickedNode.current = null;
+      setSelectedNode(node);
+      if (node.x !== undefined && node.y !== undefined && fgRef.current && !isGMMode) {
+        fgRef.current.centerAt(node.x, node.y, 800);
       }
-    } else {
-      setSearchResults([]);
-    }
-  };
-
-  const handleSelectSearchResult = (nodeId: string) => {
-    const foundNode = data.nodes.find(n => n.id === nodeId);
-    if (foundNode) {
-      handleNodeClick(foundNode);
-    } else {
-      alert("Aby wycentrować ten węzeł, rozszerz graf w jego pobliżu (brak go w obecnym widoku).");
-    }
-    setSearchQuery("");
-    setSearchResults([]);
-  };
+    }, 250);
+  }, [data, isGMMode, linkingState, selectedNode]);
 
   const handleFindPath = async () => {
     if (!pathSource || !pathTarget) return;
     try {
-      const res = await axios.get(`http://localhost:8000/api/path?source=${encodeURIComponent(pathSource.id)}&target=${encodeURIComponent(pathTarget.id)}`);
+      const graph = await api.findPath(pathSource.id as string, pathTarget.id as string);
+      if (graph.nodes.length === 0) {
+        alert("No path found between these nodes.");
+        return;
+      }
       
-      const pNodes = new Set<string>();
-      const pLinks = new Set<string>();
-      res.data.nodes.forEach((n: any) => pNodes.add(n.id));
-      res.data.links.forEach((l: any) => {
-        const sid = typeof l.source === 'object' ? l.source.id : l.source;
-        const tid = typeof l.target === 'object' ? l.target.id : l.target;
-        pLinks.add(`${sid}-${l.type}-${tid}`);
-      });
-      setPathNodes(pNodes);
-      setPathLinks(pLinks);
+      const newPathNodes = new Set<string>();
+      graph.nodes.forEach(n => newPathNodes.add(n.id as string));
+      setPathNodes(newPathNodes);
       
-      // Dodajemy do głównego grafu jeśli węzły lub relacje są nowe
-      setData((prevData) => {
-        const nodeMap = new Map(prevData.nodes.map(n => [n.id, n]));
-        res.data.nodes.forEach((n: Node) => {
-          if (!nodeMap.has(n.id)) {
-            nodeMap.set(n.id, n);
-          }
-        });
-        
-        const linkMap = new Map(prevData.links.map(l => {
-          const s = typeof l.source === 'object' ? l.source.id : l.source;
-          const t = typeof l.target === 'object' ? l.target.id : l.target;
-          return [`${s}-${l.type}-${t}`, l];
-        }));
-        
-        res.data.links.forEach((l: Link) => {
-          const s = typeof l.source === 'object' ? l.source.id : l.source;
-          const t = typeof l.target === 'object' ? l.target.id : l.target;
-          const key = `${s}-${l.type}-${t}`;
-          if (!linkMap.has(key)) {
-            linkMap.set(key, l);
-          }
-        });
-        return { nodes: Array.from(nodeMap.values()), links: Array.from(linkMap.values()) };
+      const newPathLinks = new Set<string>();
+      graph.links.forEach(l => {
+        const s = typeof l.source === 'object' ? l.source.id : l.source;
+        const t = typeof l.target === 'object' ? l.target.id : l.target;
+        newPathLinks.add(`${s}-${l.type}-${t}`);
       });
-    } catch (e) {
-      console.error(e);
-      alert("Nie znaleziono ścieżki!");
+      setPathLinks(newPathLinks);
+      
+      const combinedNodes = [...data.nodes];
+      const nodeMap = new Map(combinedNodes.map(n => [n.id, n]));
+      graph.nodes.forEach(n => { if (!nodeMap.has(n.id)) combinedNodes.push(n); });
+      
+      const combinedLinks = [...data.links];
+      const linkMap = new Set(combinedLinks.map(l => {
+        const s = typeof l.source === 'object' ? l.source.id : l.source;
+        const t = typeof l.target === 'object' ? l.target.id : l.target;
+        return `${s}-${l.type}-${t}`;
+      }));
+      graph.links.forEach(l => {
+        const s = typeof l.source === 'object' ? l.source.id : l.source;
+        const t = typeof l.target === 'object' ? l.target.id : l.target;
+        if (!linkMap.has(`${s}-${l.type}-${t}`)) combinedLinks.push(l);
+      });
+      
+      setData({ nodes: combinedNodes, links: combinedLinks });
+      if (fgRef.current) fgRef.current.zoomToFit(1000, 50);
+      
+    } catch (error) {
+      console.error(error);
+      alert("Error finding path.");
     }
   };
 
@@ -406,181 +250,159 @@ function App() {
 
   const handleRecommend = async () => {
     if (!selectedNode || selectedNode.label !== 'Monster') return;
-    
     try {
-      const res = await axios.get(`http://localhost:8000/api/recommend/${encodeURIComponent(selectedNode.id)}`);
-      const { nodes: newNodes, links: newLinks } = res.data;
-      
-      if (newNodes.length === 0) {
-        alert("Brak danych o słabościach i rekomendacjach dla tego potwora.");
+      const recs = await api.getRecommendations(selectedNode.id as string);
+      if (recs.length === 0) {
+        alert("No specific equipment recommendations found for this monster.");
         return;
       }
-      
-      const itemsAndSkills = newNodes.filter((n: any) => n.label === 'Item' || n.label === 'Skill');
-      setRecommendedEquipment(itemsAndSkills);
-      
-      const newAddedIds = new Set<string>();
-      const nodeMap = new Map(data.nodes.map(n => [n.id, n]));
-      const combinedNodes = [...data.nodes];
-
-      newNodes.forEach((n: Node) => {
-        if (!nodeMap.has(n.id)) {
-          n.x = selectedNode.x !== undefined ? selectedNode.x + (Math.random() * 10 - 5) : 0;
-          n.y = selectedNode.y !== undefined ? selectedNode.y + (Math.random() * 10 - 5) : 0;
-          n.vx = 0;
-          n.vy = 0;
-          nodeMap.set(n.id, n);
-          newAddedIds.add(n.id as string);
-          combinedNodes.push(n);
-        }
-      });
-      
-      const linkMap = new Map(data.links.map(l => {
-        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
-        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
-        return [`${sourceId}-${l.type}-${targetId}`, l];
-      }));
-      
-      const combinedLinks = [...data.links];
-      newLinks.forEach((l: Link) => {
-        const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
-        const targetId = typeof l.target === 'object' ? l.target.id : l.target;
-        const key = `${sourceId}-${l.type}-${targetId}`;
-        if (!linkMap.has(key)) {
-          linkMap.set(key, l);
-          combinedLinks.push(l);
-        }
-      });
-
-      setData({
-        nodes: combinedNodes,
-        links: combinedLinks
-      });
-
-      if (newAddedIds.size > 0) {
-        const now = Date.now();
-        const newHighlights = Array.from(newAddedIds).map(id => ({ id, timestamp: now }));
-        highlightsRef.current = [...highlightsRef.current, ...newHighlights];
-        
-        setTimeout(() => {
-           highlightsRef.current = highlightsRef.current.filter(h => Date.now() - h.timestamp < 3000);
-        }, 3000);
-      } else {
-        const now = Date.now();
-        highlightsRef.current = [...highlightsRef.current, { id: selectedNode.id as string, timestamp: now }];
-        setTimeout(() => {
-           highlightsRef.current = highlightsRef.current.filter(h => Date.now() - h.timestamp < 3000);
-        }, 3000);
+      setRecommendedEquipment(recs);
+      if (selectedNode.x !== undefined && selectedNode.y !== undefined && fgRef.current) {
+        fgRef.current.centerAt(selectedNode.x, selectedNode.y, 1000);
+        fgRef.current.zoom(3.5, 1000);
       }
-      
-      if (fgRef.current) {
-        fgRef.current.d3ReheatSimulation();
-        // Zamiast oddalać całą mapę, zróbmy zbliżenie na potwora, by zobaczyć rekomendowany sprzęt obok niego
-        if (selectedNode.x !== undefined && selectedNode.y !== undefined) {
-          fgRef.current.centerAt(selectedNode.x, selectedNode.y, 1000);
-          fgRef.current.zoom(3.5, 1000);
-        }
-      }
-      
     } catch (error) {
-      console.error("Błąd rekomendacji:", error);
-      alert("Wystąpił błąd podczas szukania rekomendacji.");
+      console.error(error);
+      alert("An error occurred while fetching recommendations.");
     }
   };
 
   const handleShowRecipe = async (item: Node) => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/crafting/${encodeURIComponent(item.id as string)}`);
-      if (res.data.recipe && res.data.recipe.length > 0) {
-        setActiveRecipe(res.data.recipe);
-        setRecipeItemName((item.name || item.title || 'Przedmiot') as string);
-        setActiveObtainInfo(null);
-      } else {
-        alert("Ten przedmiot nie posiada znanego schematu craftingu (może wylecieć jako cały przedmiot).");
-      }
+      const recipe = await api.getCraftingRecipe(item.id as string);
+      setActiveRecipe(recipe || []);
+      setRecipeItemName((item.name || item.title || 'Item') as string);
+      setActiveObtainInfo(null);
+      setMaterialUsages(null);
     } catch (e) {
       console.error(e);
-      alert("Błąd podczas pobierania przepisu z bazy.");
+      alert("Error fetching recipe from database.");
     }
   };
 
   const handleShowObtain = async (skill: Node) => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/obtain/${encodeURIComponent(skill.id as string)}`);
-      if (res.data.sources && res.data.sources.length > 0) {
-        setActiveObtainInfo(res.data.sources);
-        setObtainSkillName((skill.name || skill.title || 'Umiejętność') as string);
+      const sources = await api.getObtainInfo(skill.id as string);
+      if (sources && sources.length > 0) {
+        setActiveObtainInfo(sources);
+        setObtainSkillName((skill.name || skill.title || 'Skill') as string);
         setActiveRecipe(null);
         setMaterialUsages(null);
       } else {
-        alert("Brak informacji o tym, jak zdobyć tę umiejętność.");
+        alert("No information on how to obtain this skill.");
       }
     } catch (e) {
       console.error(e);
-      alert("Błąd podczas pobierania informacji o źródle.");
+      alert("Error fetching source information.");
     }
   };
 
   const handleShowUsages = async (material: Node) => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/usages/${encodeURIComponent(material.id as string)}`);
-      const items = res.data.nodes.filter((n: any) => n.label === 'Item');
+      const usages = await api.getMaterialUsages(material.id as string);
+      const items = usages.filter((n: any) => n.label === 'Item');
       if (items.length > 0) {
         setMaterialUsages(items);
         setActiveRecipe(null);
         setActiveObtainInfo(null);
       } else {
-        alert("Nie znaleziono przedmiotów, które można stworzyć z tego materiału.");
+        alert("No items found that can be crafted from this material.");
       }
     } catch (e) {
       console.error(e);
-      alert("Błąd podczas pobierania informacji o zastosowaniu materiału.");
+      alert("Error fetching material usage information.");
     }
   };
 
-  if (loading) return <div className="loading">Ładowanie grafu...</div>;
+  // --- GM Handlers ---
+  const handleCreateNode = async () => {
+    try {
+      const newNode = await api.createNode(newNodeLabel, {
+        name: nodeFormData.name || "New Node", 
+        details: nodeFormData.details || ""
+      });
+      setData(prev => ({ ...prev, nodes: [...prev.nodes, newNode] }));
+      alert("Node created successfully!");
+    } catch (e) {
+      console.error(e);
+      alert("Error creating node.");
+    }
+  };
+
+  const handleUpdateNode = async () => {
+    if (!selectedNode) return;
+    try {
+      const props = { ...nodeFormData };
+      delete props.id; delete props.label; delete props.game_id; delete props.weaknesses; delete props.resistances;
+      const updatedNode = await api.updateNode(selectedNode.id as string, props);
+      
+      setData(prev => {
+        const newNodes = [...prev.nodes];
+        const nodeIndex = newNodes.findIndex(n => n.id === updatedNode.id);
+        if (nodeIndex !== -1) {
+          Object.assign(newNodes[nodeIndex], updatedNode);
+        }
+        return { ...prev, nodes: newNodes };
+      });
+      
+      setSelectedNode(prev => prev ? { ...prev, ...updatedNode } : null);
+      alert("Node updated successfully!");
+    } catch (e) {
+      console.error(e);
+      alert("Error updating node.");
+    }
+  };
+
+  const handleDeleteNode = async () => {
+    if (!selectedNode) return;
+    if (window.confirm(`Are you sure you want to delete ${selectedNode.name || selectedNode.title}?`)) {
+      try {
+        await api.deleteNode(selectedNode.id as string);
+        setData(prev => ({
+          nodes: prev.nodes.filter(n => n.id !== selectedNode.id),
+          links: prev.links.filter(l => {
+            const sid = typeof l.source === 'object' ? l.source.id : l.source;
+            const tid = typeof l.target === 'object' ? l.target.id : l.target;
+            return sid !== selectedNode.id && tid !== selectedNode.id;
+          })
+        }));
+        setSelectedNode(null);
+        alert("Node deleted!");
+      } catch (e) {
+        console.error(e);
+        alert("Error deleting node.");
+      }
+    }
+  };
+
+  if (loading) return <div className="loading">Loading Graph Universe...</div>;
+
+  const svgStrings = getSvgStrings();
 
   return (
     <div className="app-container">
-      {/* Ekran powitalny */}
       {showWelcome && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', 
-          backgroundColor: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(5px)',
-          display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: '#1a1005', border: '2px solid #d4af37', borderRadius: '8px',
-            padding: '40px', maxWidth: '600px', color: '#e8e4c9',
-            boxShadow: '0 0 30px rgba(212, 175, 55, 0.2), inset 0 0 20px rgba(0,0,0,0.8)'
-          }}>
-            <h1 style={{ fontFamily: 'Cinzel Decorative', color: '#d4af37', textAlign: 'center', marginTop: 0, marginBottom: '10px' }}>
-              Witaj w RPG Graph
-            </h1>
-            <h3 style={{ textAlign: 'center', color: '#a3c9a8', marginTop: 0, marginBottom: '30px', fontWeight: 'normal' }}>
-              Interaktywnym Asystencie Nordyckich Wypraw
-            </h3>
+        <div className="welcome-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(11, 17, 13, 0.95)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div className="welcome-modal" style={{ backgroundColor: 'rgba(22, 36, 27, 0.9)', border: '1px solid #d4af37', borderRadius: '12px', padding: '40px', maxWidth: '600px', textAlign: 'left', color: '#e8e4c9', boxShadow: '0 0 50px rgba(212, 175, 55, 0.15)' }}>
+            <h1 style={{ color: '#d4af37', fontFamily: 'Cinzel Decorative', textAlign: 'center', fontSize: '2.5rem', marginTop: 0 }}>Welcome to RPG Graph</h1>
+            <p style={{ fontSize: '1.1rem', lineHeight: 1.6 }}>Navigate a vast universe of interconnected game lore, items, monsters, and characters. Uncover hidden relations and craft the ultimate build.</p>
             
-            <p style={{ lineHeight: '1.6', marginBottom: '20px' }}>
-              Ta aplikacja to wizualny silnik bazy danych grafowych (Neo4j), który pozwala na analizę zależności w świecie gry RPG. Użyj grafu, aby zdobyć przewagę w walce i planować swoje rzemiosło.
-            </p>
-            
-            <ul style={{ listStyleType: 'none', padding: 0, marginBottom: '30px' }}>
-              <li style={{ marginBottom: '15px', display: 'flex', alignItems: 'flex-start' }}>
-                <div style={{ flexShrink: 0, width: '28px' }}><IconSearch size={22} style={{ color: '#a3c9a8' }} /></div>
-                <div><strong>Eksploracja i Wyszukiwanie:</strong> Poruszaj się po interaktywnym grafie i korzystaj z paska wyszukiwania, by szybko namierzyć interesujące Cię potwory, postacie czy przedmioty.</div>
+            <ul style={{ paddingLeft: '0', margin: '25px 0', lineHeight: 1.8, listStyleType: 'none' }}>
+              <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '10px' }}>
+                <span style={{ color: '#d4af37', marginRight: '10px', marginTop: '4px' }}><IconRefresh size={18} /></span>
+                <div><span style={{ color: '#d4af37', fontWeight: 'bold' }}>Double-click</span> any node to fetch its direct connections from the database.</div>
               </li>
-              <li style={{ marginBottom: '15px', display: 'flex', alignItems: 'flex-start' }}>
-                <div style={{ flexShrink: 0, width: '28px' }}><IconShield size={22} style={{ color: '#a3c9a8' }} /></div>
-                <div><strong>Analiza Walki:</strong> Kliknij potwora, aby odkryć jego ukryte słabości i odporności na różne żywioły.</div>
+              <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '10px' }}>
+                <span style={{ color: '#d4af37', marginRight: '10px', marginTop: '4px' }}><IconSearch size={18} /></span>
+                <div>Use the <span style={{ color: '#d4af37', fontWeight: 'bold' }}>Search Bar</span> to quickly locate specific elements.</div>
               </li>
-              <li style={{ marginBottom: '15px', display: 'flex', alignItems: 'flex-start' }}>
-                <div style={{ flexShrink: 0, width: '28px' }}><IconSwords size={22} style={{ color: '#a3c9a8' }} /></div>
-                <div><strong>Rekomendacje Wyposażenia:</strong> Użyj silnika rekomendacji, który przeszuka graf, by zasugerować najlepszą dostępną broń i magię na wybranego wroga.</div>
+              <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '10px' }}>
+                <span style={{ color: '#d4af37', marginRight: '10px', marginTop: '4px' }}><IconTarget size={18} /></span>
+                <div>Access the <span style={{ color: '#d4af37', fontWeight: 'bold' }}>Pathfinder</span> to discover the shortest route between two distant nodes (e.g., from a Material to the Monster that drops it).</div>
               </li>
-              <li style={{ marginBottom: '15px', display: 'flex', alignItems: 'flex-start' }}>
-                <div style={{ flexShrink: 0, width: '28px' }}><IconTools size={22} style={{ color: '#a3c9a8' }} /></div>
-                <div><strong>Kalkulator Craftingu:</strong> Znalazłeś potężną broń? Zobacz jej "Przepis", a silnik rekurencyjnie wskaże Ci, u jakich potworów szukać materiałów do jej wytworzenia.</div>
+              <li style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '10px' }}>
+                <span style={{ color: '#d4af37', marginRight: '10px', marginTop: '4px' }}><IconShield size={18} /></span>
+                <div>Click on nodes to view their <span style={{ color: '#d4af37', fontWeight: 'bold' }}>Detailed Stats</span> and unique interactions.</div>
               </li>
             </ul>
             
@@ -590,7 +412,7 @@ function App() {
                 style={{ backgroundColor: '#3a2800', border: '1px solid #d4af37', color: '#d4af37', padding: '12px 24px', fontSize: '1.1rem', fontFamily: 'Cinzel Decorative', cursor: 'pointer', transition: 'all 0.2s' }}
                 onClick={() => setShowWelcome(false)}
               >
-                Rozpocznij Eksplorację
+                Begin Exploration
               </button>
             </div>
           </div>
@@ -598,28 +420,16 @@ function App() {
       )}
 
       <header className="app-header">
-        <div className="brand">
-          RPG Graph
-        </div>
-
+        <div className="brand">RPG Graph</div>
         <div className="legend">
           {Object.entries(svgStrings).map(([label, svg]) => (
             <span key={label} style={{ color: getNodeColor({ label } as Node), display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{
-                width: '24px', 
-                height: '24px', 
-                backgroundColor: getNodeColor({ label } as Node),
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                width: '24px', height: '24px', backgroundColor: getNodeColor({ label } as Node),
+                borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 0 5px rgba(0,0,0,0.5)'
               }}>
-                <span 
-                  className="rpg-icon"
-                  style={{ width: '16px', height: '16px', display: 'block', color: 'white' }} 
-                  dangerouslySetInnerHTML={{ __html: svg }} 
-                />
+                <span className="rpg-icon" style={{ width: '16px', height: '16px', display: 'block', color: 'white' }} dangerouslySetInnerHTML={{ __html: svg }} />
               </span>
               {translateLabel(label)}
             </span>
@@ -628,333 +438,121 @@ function App() {
       </header>
       
       <div className="main-content">
-        <div className="floating-search-container">
-          <input 
-            type="text" 
-            placeholder="Szukaj wiedzy w grafie (np. Thor, Mjolnir, Runy)..." 
-            value={searchQuery}
-            onChange={handleSearch}
-            className="search-input"
-          />
-          {searchResults.length > 0 && (
-            <div className="search-results">
-              {searchResults.map(n => (
-                <div key={n.id} className="search-result-item" onClick={() => handleSelectSearchResult(n.id)}>
-                  {n.name || n.title || n.game_id} <span style={{fontSize: '0.7rem', color: '#8b949e'}}>({n.label})</span>
-                </div>
-              ))}
+        <SearchBar 
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          searchResults={searchResults}
+          onSearch={handleSearch}
+          onSelectResult={handleSelectSearchResult}
+        />
+        
+        {/* GM Mode Toggle */}
+        <div className="gm-toggle-container">
+          <label className="gm-switch">
+            <input type="checkbox" checked={isGMMode} onChange={(e) => setIsGMMode(e.target.checked)} />
+            <span className="gm-slider"></span>
+          </label>
+          <span>Game Master Mode</span>
+        </div>
+        
+        {/* Reset Graph Button Overlay */}
+        <div style={{ position: 'absolute', bottom: '25px', right: '25px', zIndex: 100 }}>
+          <button 
+            className="action-button close-btn" 
+            style={{ padding: '10px 20px', borderRadius: '8px', display: 'flex', alignItems: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.6)', backdropFilter: 'blur(5px)' }}
+            onClick={() => {
+              api.getGraph().then(data => {
+                setData(data);
+                setSelectedNode(null);
+                clearPath();
+                setRecommendedEquipment([]);
+                setActiveRecipe(null);
+                setActiveObtainInfo(null);
+                setMaterialUsages(null);
+                setSearchQuery('');
+                setSearchResults([]);
+                setTimeout(() => { if (fgRef.current) fgRef.current.zoomToFit(800, 50); }, 300);
+              });
+            }}
+          >
+            <IconRefresh /> Reset Graph
+          </button>
+        </div>
+
+        <GraphViewer 
+          ref={fgRef}
+          data={data}
+          pathLinks={pathLinks}
+          pathNodes={pathNodes}
+          selectedNode={selectedNode}
+          recommendedEquipment={recommendedEquipment}
+          highlightsRef={highlightsRef}
+          onNodeClick={handleNodeClick}
+          getNodeColor={getNodeColor}
+          translateLabel={translateLabel}
+          translateRelation={translateRelation}
+        />
+        
+        <Sidebar 
+          isOpen={!!(selectedNode || pathSource || pathTarget || isGMMode)} 
+          isGMMode={isGMMode}
+          onClose={() => { setSelectedNode(null); clearPath(); setRecommendedEquipment([]); setActiveRecipe(null); }}
+        >
+          {isGMMode ? (
+            <GMEditor 
+              selectedNode={selectedNode}
+              nodeFormData={nodeFormData}
+              setNodeFormData={setNodeFormData}
+              newNodeLabel={newNodeLabel}
+              setNewNodeLabel={setNewNodeLabel}
+              linkingState={linkingState}
+              setLinkingState={setLinkingState}
+              onCreateNode={handleCreateNode}
+              onUpdateNode={handleUpdateNode}
+              onDeleteNode={handleDeleteNode}
+            />
+          ) : selectedNode ? (
+            <NodeDetails 
+              selectedNode={selectedNode}
+              recommendedEquipment={recommendedEquipment}
+              activeRecipe={activeRecipe}
+              recipeItemName={recipeItemName}
+              activeObtainInfo={activeObtainInfo}
+              obtainSkillName={obtainSkillName}
+              materialUsages={materialUsages}
+              onExpandNode={handleExpandNode}
+              onDoubleClickExpand={() => handleDoubleClickExpand(selectedNode)}
+              onRecommend={handleRecommend}
+              onShowRecipe={handleShowRecipe}
+              onShowObtain={handleShowObtain}
+              onShowUsages={handleShowUsages}
+              onClearRecipe={() => setActiveRecipe(null)}
+              onClearObtain={() => setActiveObtainInfo(null)}
+              onClearUsages={() => setMaterialUsages(null)}
+              getNodeColor={getNodeColor}
+              translateLabel={translateLabel}
+              translateRelation={translateRelation}
+              translateDetailKey={translateDetailKey}
+            />
+          ) : (
+            <div style={{ color: '#8b949e', fontStyle: 'italic', marginBottom: '20px' }}>
+              Select a node to view its details.
             </div>
           )}
-        </div>
-        
-        <div className="graph-wrapper">
-          {/* Kontrolki mapy w prawym dolnym rogu */}
-          <div style={{ position: 'absolute', bottom: '25px', right: '25px', zIndex: 100 }}>
-            <button 
-              className="action-button close-btn" 
-              style={{ 
-                padding: '10px 20px', 
-                borderRadius: '8px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                boxShadow: '0 4px 15px rgba(0,0,0,0.6)',
-                backdropFilter: 'blur(5px)',
-                backgroundColor: 'rgba(51, 26, 26, 0.85)'
-              }}
-              onClick={() => window.location.reload()}
-            >
-              <IconRefresh /> Resetuj Graf
-            </button>
-          </div>
-
-          <ForceGraph2D
-            ref={fgRef}
-            graphData={data}
-            nodeLabel={(node: any) => `${translateLabel(node.label)}: ${node.name || node.title || node.game_id || 'Nieznany'}`}
-            nodeColor={(node: any) => getNodeColor(node)}
-            nodeRelSize={7}
-            linkColor={(link: any) => {
-              const sid = typeof link.source === 'object' ? link.source.id : link.source;
-              const tid = typeof link.target === 'object' ? link.target.id : link.target;
-              return pathLinks.has(`${sid}-${link.type}-${tid}`) ? '#FFD700' : '#444';
-            }}
-            linkWidth={(link: any) => {
-              const sid = typeof link.source === 'object' ? link.source.id : link.source;
-              const tid = typeof link.target === 'object' ? link.target.id : link.target;
-              return pathLinks.has(`${sid}-${link.type}-${tid}`) ? 3 : 1;
-            }}
-            linkDirectionalArrowLength={3.5}
-            linkDirectionalArrowRelPos={1}
-            linkLabel={(link: any) => translateRelation(link.type)}
-            onNodeClick={handleNodeClick}
-            nodeCanvasObjectMode={() => 'replace'}
-            nodeCanvasObject={(node, ctx, globalScale) => {
-              if (node.x === undefined || node.y === undefined) return;
-              
-              const isSelected = node.id === selectedNode?.id;
-              const isPath = pathNodes.has(node.id as string);
-              const isRecommended = recommendedEquipment.some(r => r.id === node.id);
-              const highlight = highlightsRef.current.find(h => h.id === node.id);
-              const size = 6;
-              
-              // Animacja poświaty dla nowo dodanych węzłów
-              if (highlight) {
-                const elapsed = Date.now() - highlight.timestamp;
-                const duration = 2500; // Poświata trwa 2.5 sekundy
-                if (elapsed < duration) {
-                  const progress = elapsed / duration;
-                  const alpha = 0.8 * (1 - progress); // Znika płynnie od 0.8 do 0
-                  const glowSize = size + 15 * (1 - progress); // Pulsuje z zewnątrz do wewnątrz
-                  ctx.beginPath();
-                  ctx.arc(node.x, node.y, glowSize, 0, 2 * Math.PI, false);
-                  ctx.fillStyle = `rgba(0, 255, 255, ${alpha})`;
-                  ctx.fill();
-                }
-              }
-
-              // Podświetlenie dla selekcji lub ścieżki
-              if (isSelected || isPath) {
-                ctx.beginPath();
-                ctx.arc(node.x, node.y, size + 4, 0, 2 * Math.PI, false);
-                ctx.fillStyle = isSelected ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 215, 0, 0.4)';
-                ctx.fill();
-              }
-              
-              // Czerwono-Złoty krąg oznaczający rekomendowany sprzęt na potwora
-              if (isRecommended) {
-                ctx.beginPath();
-                ctx.arc(node.x, node.y, size + 8, 0, 2 * Math.PI, false);
-                ctx.strokeStyle = '#D4AF37'; // Nordyckie złoto
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-                
-                // Poświata
-                ctx.shadowColor = '#FF4500'; // Ognista czerwień
-                ctx.shadowBlur = 15;
-              }
-
-              // Rysowanie kółka węzła
-              ctx.beginPath();
-              ctx.arc(node.x, node.y, size, 0, 2 * Math.PI, false);
-              ctx.fillStyle = getNodeColor(node as Node);
-              ctx.fill();
-              
-              // Reset shadowBlur po narysowaniu tła węzła, żeby ikona SVG nie była rozmazana
-              ctx.shadowBlur = 0;
-
-              // Rysowanie ikony SVG
-              const img = ICONS[(node as Node).label];
-              if (img) {
-                const imgSize = size * 1.3; // Ikona dopasowana wielkością do kółka
-                ctx.drawImage(img, node.x - imgSize/2, node.y - imgSize/2, imgSize, imgSize);
-              }
-            }}
-          />
-        </div>
-        
-        {/* Panel boczny */}
-        <div className={`sidebar ${selectedNode || pathSource || pathTarget ? 'open' : ''}`}>
-          <div className="sidebar-content" style={{ height: '100%', overflowY: 'auto' }}>
-            {selectedNode ? (
-              <>
-                <h2>{selectedNode.name || selectedNode.title || 'Nieznany Obiekt'}</h2>
-                <span className="badge" style={{backgroundColor: getNodeColor(selectedNode)}}>
-                  {translateLabel(selectedNode.label as string)}
-                </span>
-                
-                <div className="details-list">
-                  {Object.entries(selectedNode)
-                    .filter(([key]) => !key.startsWith('_') && !['id', 'x', 'y', 'vx', 'vy', 'fx', 'fy', 'index', 'name', 'title', 'label', 'game_id'].includes(key))
-                    .map(([key, value]) => (
-                      <div className="detail-item" key={key}>
-                        <span className="detail-key">{translateDetailKey(key)}:</span>
-                        <span className="detail-value">{String(value)}</span>
-                      </div>
-                    ))}
-                </div>
-
-                <button className="action-button expand-btn" onClick={handleExpandNode}>
-                  <IconSearch /> Eksploruj powiązania
-                </button>
-                <button className="action-button expand-btn" onClick={() => handleDoubleClickExpand(selectedNode)}>
-                  <IconSearch /> Pobierz powiązania (Rozwiń)
-                </button>
-                {selectedNode.label === 'Monster' && (
-                  <button className="action-button" style={{backgroundColor: '#4a1515', color: '#ffb3b3', marginTop: '10px'}} onClick={handleRecommend}>
-                    <IconSwords /> Znajdź wyposażenie na potwora
-                  </button>
-                )}
-                {selectedNode.label === 'Item' && (
-                  <button className="action-button expand-btn" style={{backgroundColor: '#3a2800', color: '#d4af37', marginTop: '10px', border: '1px solid #d4af37'}} onClick={() => handleShowRecipe(selectedNode)}>
-                    <IconTools /> Pokaż jak stworzyć (Przepis)
-                  </button>
-                )}
-                {selectedNode.label === 'Skill' && (
-                  <button className="action-button expand-btn" style={{backgroundColor: '#101d2b', color: '#58a6ff', marginTop: '10px', border: '1px solid #58a6ff'}} onClick={() => handleShowObtain(selectedNode)}>
-                    <IconSearch /> Pokaż jak zdobyć
-                  </button>
-                )}
-                {selectedNode.label === 'Material' && (
-                  <button className="action-button expand-btn" style={{backgroundColor: '#1f2937', color: '#a3c9a8', marginTop: '10px', border: '1px solid #a3c9a8'}} onClick={() => handleShowUsages(selectedNode)}>
-                    <IconTools /> Do czego służy (Zastosowanie)
-                  </button>
-                )}
-                
-                {recommendedEquipment.length > 0 && (
-                  <div style={{ marginTop: '15px', border: '1px solid #d4af37', padding: '15px', borderRadius: '8px', backgroundColor: 'rgba(212, 175, 55, 0.05)' }}>
-                    <h4 style={{ color: '#d4af37', margin: '0 0 12px 0', fontFamily: 'Cinzel Decorative', letterSpacing: '1px' }}>Zalecany Ekwipunek:</h4>
-                    {recommendedEquipment.map(item => (
-                      <div key={item.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px dotted rgba(212, 175, 55, 0.3)' }}>
-                        <span style={{ marginRight: '8px', display: 'flex', color: '#d4af37' }}><IconSwords size={18} style={{margin: 0}} /></span>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <span style={{ color: '#e8e4c9', fontWeight: 600, fontSize: '0.95rem' }}>{item.name || item.title}</span>
-                          <span style={{ color: '#a3c9a8', fontSize: '0.75rem', textTransform: 'uppercase' }}>{translateLabel(item.label as string)}</span>
-                        </div>
-                        {item.label === 'Item' && (
-                          <button 
-                            className="recipe-btn"
-                            style={{ marginLeft: 'auto', backgroundColor: '#3a2800', border: '1px solid #d4af37', color: '#d4af37', fontSize: '0.75rem', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Cinzel Decorative', display: 'flex', alignItems: 'center' }}
-                            onClick={(e) => { e.stopPropagation(); handleShowRecipe(item); }}
-                          >
-                            <IconTools size={12} /> Przepis
-                          </button>
-                        )}
-                        {item.label === 'Skill' && (
-                          <button 
-                            className="recipe-btn"
-                            style={{ marginLeft: 'auto', backgroundColor: '#101d2b', border: '1px solid #58a6ff', color: '#58a6ff', fontSize: '0.75rem', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer', fontFamily: 'Cinzel Decorative', display: 'flex', alignItems: 'center' }}
-                            onClick={(e) => { e.stopPropagation(); handleShowObtain(item); }}
-                          >
-                            <IconSearch size={12} /> Jak zdobyć
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {activeRecipe && (
-                  <div style={{ marginTop: '15px', border: '1px solid #7cb342', padding: '15px', borderRadius: '8px', backgroundColor: 'rgba(124, 179, 66, 0.1)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                      <h4 style={{ color: '#aed581', margin: 0, fontFamily: 'Cinzel Decorative', letterSpacing: '1px', display: 'flex', alignItems: 'center' }}><IconTools size={16} /> Składniki: {recipeItemName}</h4>
-                      <button onClick={() => setActiveRecipe(null)} style={{ background: 'none', border: 'none', color: '#aed581', cursor: 'pointer', fontSize: '1.2rem', padding: '0 5px' }}>✕</button>
-                    </div>
-                    {activeRecipe.map((ingred, idx) => (
-                      <div key={idx} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: idx < activeRecipe.length - 1 ? '1px dotted rgba(124, 179, 66, 0.3)' : 'none' }}>
-                        <div style={{ color: '#e8e4c9', fontWeight: 'bold' }}>
-                          {ingred.quantity}x {ingred.material}
-                        </div>
-                        {ingred.sources && ingred.sources.length > 0 ? (
-                          <div style={{ fontSize: '0.8rem', color: '#bcaaa4', marginTop: '4px' }}>
-                            Zdobywane z: <span style={{color: '#ffb3b3'}}>{ingred.sources.join(', ')}</span>
-                          </div>
-                        ) : (
-                          <div style={{ fontSize: '0.8rem', color: '#bcaaa4', marginTop: '4px', fontStyle: 'italic' }}>
-                            Nieznane źródło (poszukaj u legendarnych rzemieślników)
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {activeObtainInfo && (
-                  <div style={{ marginTop: '15px', border: '1px solid #58a6ff', padding: '15px', borderRadius: '8px', backgroundColor: 'rgba(88, 166, 255, 0.1)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                      <h4 style={{ color: '#58a6ff', margin: 0, fontFamily: 'Cinzel Decorative', letterSpacing: '1px', display: 'flex', alignItems: 'center' }}><IconSearch size={16} /> Źródło: {obtainSkillName}</h4>
-                      <button onClick={() => setActiveObtainInfo(null)} style={{ background: 'none', border: 'none', color: '#58a6ff', cursor: 'pointer', fontSize: '1.2rem', padding: '0 5px' }}>✕</button>
-                    </div>
-                    {activeObtainInfo.map((src, idx) => (
-                      <div key={idx} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: idx < activeObtainInfo.length - 1 ? '1px dotted rgba(88, 166, 255, 0.3)' : 'none' }}>
-                        <div style={{ color: '#e8e4c9', fontWeight: 'bold' }}>
-                          {src.name} <span style={{fontSize: '0.75rem', color: '#a3c9a8', fontWeight: 'normal'}}>({translateLabel(src.label)})</span>
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: '#bcaaa4', marginTop: '4px' }}>
-                          Powiązanie: <span style={{color: '#58a6ff'}}>{translateRelation(src.type)}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {materialUsages && (
-                  <div style={{ marginTop: '15px', border: '1px solid #a3c9a8', padding: '15px', borderRadius: '8px', backgroundColor: 'rgba(163, 201, 168, 0.1)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                      <h4 style={{ color: '#a3c9a8', margin: 0, fontFamily: 'Cinzel Decorative', letterSpacing: '1px', display: 'flex', alignItems: 'center' }}><IconTools size={16} style={{marginRight: '8px'}} /> Można wytworzyć:</h4>
-                      <button onClick={() => setMaterialUsages(null)} style={{ background: 'none', border: 'none', color: '#a3c9a8', cursor: 'pointer', fontSize: '1.2rem', padding: '0 5px' }}>✕</button>
-                    </div>
-                    {materialUsages.map((item: any, idx) => (
-                      <div key={item.id} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: idx < materialUsages.length - 1 ? '1px dotted rgba(163, 201, 168, 0.3)' : 'none' }}>
-                        <div style={{ color: '#e8e4c9', fontWeight: 'bold' }}>
-                          {item.name || item.title}
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: '#bcaaa4', marginTop: '4px' }}>
-                          Kategoria: <span style={{color: '#ffd700'}}>Przedmiot {item.rarity ? `(${item.rarity})` : ''}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <div style={{ color: '#8b949e', fontStyle: 'italic', marginBottom: '20px' }}>
-                Wybierz węzeł, aby zobaczyć jego szczegóły.
-              </div>
-            )}
-            
-            <hr style={{ borderColor: '#30363d', margin: '20px 0', width: '100%' }} />
-            
-            {/* Sekcja Pathfindera w panelu bocznym */}
-            <div>
-              <h3 style={{ color: '#FFD700', margin: '0 0 10px 0' }}>Narzędzie Ścieżki</h3>
-              
-              <div style={{display: 'flex', gap: '10px', marginBottom: '15px'}}>
-                <button 
-                  className="action-button path-btn" 
-                  onClick={() => selectedNode && setPathSource(selectedNode)} 
-                  disabled={!selectedNode}
-                  style={{flex: 1, opacity: selectedNode ? 1 : 0.5}}
-                >
-                  <IconStart /> Ustaw Start
-                </button>
-                <button 
-                  className="action-button path-btn" 
-                  onClick={() => selectedNode && setPathTarget(selectedNode)} 
-                  disabled={!selectedNode}
-                  style={{flex: 1, opacity: selectedNode ? 1 : 0.5}}
-                >
-                  <IconTarget /> Ustaw Cel
-                </button>
-              </div>
-
-              <p style={{ margin: '5px 0', fontSize: '0.9rem' }}><IconStart /> Start: <strong style={{color: '#fff'}}>{pathSource ? (pathSource.name || pathSource.title || pathSource.game_id) : '---'}</strong></p>
-              <p style={{ margin: '5px 0', fontSize: '0.9rem' }}><IconTarget /> Cel: <strong style={{color: '#fff'}}>{pathTarget ? (pathTarget.name || pathTarget.title || pathTarget.game_id) : '---'}</strong></p>
-              
-              <button 
-                onClick={handleFindPath} 
-                disabled={!pathSource || !pathTarget} 
-                className="action-button expand-btn" 
-                style={{width: '100%', marginTop: '15px'}}
-              >
-                Szukaj Ścieżki
-              </button>
-              
-              {(pathSource || pathTarget || pathNodes.size > 0) && (
-                <button onClick={clearPath} className="action-button close-btn" style={{width: '100%', marginTop: '10px'}}>
-                  Wyczyść narzędzie ścieżki
-                </button>
-              )}
-            </div>
-
-            <button 
-              className="action-button close-btn" 
-              style={{marginTop: 'auto'}} 
-              onClick={() => { setSelectedNode(null); clearPath(); setRecommendedEquipment([]); setActiveRecipe(null); }}
-            >
-              Zamknij cały panel
-            </button>
-          </div>
-        </div>
+          
+          {!isGMMode && (
+            <Pathfinder 
+              selectedNode={selectedNode}
+              pathSource={pathSource}
+              pathTarget={pathTarget}
+              pathNodes={pathNodes}
+              setPathSource={setPathSource}
+              setPathTarget={setPathTarget}
+              onFindPath={handleFindPath}
+              onClearPath={clearPath}
+            />
+          )}
+        </Sidebar>
       </div>
     </div>
   );

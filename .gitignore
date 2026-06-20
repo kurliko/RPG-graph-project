@@ -141,3 +141,7 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Ignoruj pliki bazy danych Neo4j
+neo4j/data/
+neo4j/logs/

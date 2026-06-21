@@ -194,7 +194,7 @@ flowchart TD
 Mimo braku klasycznego schematu w neo4j, poniższy diagram klas UML odzwierciedla relacje między typami (Etykietami) węzłów.
 
 ```mermaid
-flowchart TD
+flowchart LR
     %% Węzły (Etykiety)
     Monster((Monster))
     Material((Material))

@@ -176,11 +176,11 @@ flowchart TD
     end
 
     %% Połączenia
-    UI <-->|HTTP/REST| API
-    GM_Panel <-->|HTTP/REST| API
+    UI <-->|HTTP REST| API
+    GM_Panel <-->|HTTP REST| API
     Canvas -.->|Konsumuje dane| UI
     API <--> Neo4j_Driver
-    Neo4j_Driver <-->|Protokół Bolt (Port 7687)| Neo4j
+    Neo4j_Driver <-->|Protokol Bolt - Port 7687| Neo4j
 ```
 
 ### 3. Diagram Klas / Model Danych (Graph Schema Diagram)

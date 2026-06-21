@@ -194,41 +194,22 @@ flowchart TD
 Mimo braku klasycznego schematu w neo4j, poniższy diagram klas UML odzwierciedla relacje między typami (Etykietami) węzłów.
 
 ```mermaid
-classDiagram
-    class Monster {
-        +String name
-        +String details
-    }
-    class Material {
-        +String name
-        +String details
-    }
-    class Item {
-        +String name
-        +String details
-    }
-    class NPC {
-        +String name
-        +String details
-    }
-    class Quest {
-        +String name
-        +String details
-    }
-    class Skill {
-        +String name
-        +String details
-    }
-    class Zone {
-        +String name
-        +String details
-    }
+flowchart TD
+    %% Węzły (Etykiety)
+    Monster((Monster))
+    Material((Material))
+    Item((Item))
+    NPC((NPC))
+    Quest((Quest))
+    Skill((Skill))
+    Zone((Zone))
 
-    Monster --> Material : DROPS
-    Monster --> Monster : WEAK_AGAINST
-    Item --> Material : REQUIRES
-    Quest --> Monster : TARGETS
-    NPC --> Quest : GIVES
-    NPC --> Zone : LOCATED_IN
-    Skill --> Monster : LEARNED_FROM
+    %% Relacje
+    Monster -->|DROPS| Material
+    Monster -->|WEAK_AGAINST| Monster
+    Item -->|REQUIRES| Material
+    Quest -->|TARGETS| Monster
+    NPC -->|GIVES| Quest
+    NPC -->|LOCATED_IN| Zone
+    Skill -->|LEARNED_FROM| Monster
 ```

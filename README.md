@@ -214,4 +214,5 @@ flowchart LR
     NPC -->|GIVES| Quest
     NPC -->|LOCATED_IN| Zone
     Skill -->|LEARNED_FROM| Monster
+    Skill -->|USES_ELEMENT| Element
 ```

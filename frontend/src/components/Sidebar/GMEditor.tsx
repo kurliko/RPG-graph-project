@@ -29,8 +29,8 @@ export const GMEditor: React.FC<GMEditorProps> = ({
 }) => {
   return (
     <div>
-      <h2 style={{ color: '#ff4500', margin: '0 0 15px 0', fontFamily: 'Cinzel Decorative', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <IconTools /> Game Master
+      <h2 style={{ color: '#ff4500', margin: '0 0 15px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <IconTools size={32} /> Game Master
       </h2>
       
       {linkingState.active && (
@@ -48,7 +48,7 @@ export const GMEditor: React.FC<GMEditorProps> = ({
           <textarea className="gm-input" value={nodeFormData.details || ''} onChange={e => setNodeFormData({...nodeFormData, details: e.target.value})} placeholder="Details" rows={4} />
           
           <button className="gm-btn primary" onClick={onUpdateNode}>Save Changes</button>
-          <button className="gm-btn" onClick={() => setLinkingState({ active: true, targetLabel: "NEW_LINK" })}>Link to...</button>
+          <button className="gm-btn secondary" onClick={() => setLinkingState({ active: true, targetLabel: "NEW_LINK" })}>Link to...</button>
           <button className="gm-btn danger" onClick={onDeleteNode}>Delete Node</button>
         </div>
       ) : (

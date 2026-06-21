@@ -455,15 +455,26 @@ input:checked + .gm-slider:before {
   transform: translateY(-1px);
 }
 .gm-btn.primary {
-  background-color: #331a1a;
-  border-color: #d45b37;
-  color: #d45b37;
+  background-color: #1a3320;
+  border-color: #4caf50;
+  color: #4caf50;
 }
 .gm-btn.primary:hover {
-  background-color: #4a2525;
-  border-color: #f07040;
-  color: #f07040;
-  box-shadow: 0 0 10px rgba(212, 91, 55, 0.3);
+  background-color: #254a2d;
+  border-color: #66bb6a;
+  color: #66bb6a;
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+}
+.gm-btn.secondary {
+  background-color: #1a2333;
+  border-color: #3f51b5;
+  color: #5c6bc0;
+}
+.gm-btn.secondary:hover {
+  background-color: #25314a;
+  border-color: #5c6bc0;
+  color: #7986cb;
+  box-shadow: 0 0 10px rgba(63, 81, 181, 0.3);
 }
 .gm-btn.danger {
   background-color: #2b1111;

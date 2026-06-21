@@ -438,7 +438,10 @@ function App() {
       )}
 
       <header className="app-header">
-        <div className="brand">RPG Graph</div>
+        <div className="brand" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <IconShield size={32} />
+          RPG Graph
+        </div>
         <div className="legend">
           {Object.entries(svgStrings).map(([label, svg]) => (
             <span key={label} style={{ color: getNodeColor({ label } as Node), display: 'flex', alignItems: 'center', gap: '8px' }}>

@@ -203,11 +203,13 @@ flowchart TD
     Quest((Quest))
     Skill((Skill))
     Zone((Zone))
+    Element((Element))
 
     %% Relacje
     Monster -->|DROPS| Material
-    Monster -->|WEAK_AGAINST| Monster
+    Monster -->|WEAK_AGAINST| Element
     Item -->|REQUIRES| Material
+    Item -->|IMBUED_WITH| Element
     Quest -->|TARGETS| Monster
     NPC -->|GIVES| Quest
     NPC -->|LOCATED_IN| Zone

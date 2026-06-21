@@ -172,15 +172,21 @@ flowchart TD
     end
 
     subgraph Database["Baza Danych (Docker)"]
-        Neo4j[("Neo4j Graph Database\n(wtyczka APOC)")]
+        Neo4j[("Neo4j Graph DB")]
     end
 
     %% Połączenia
-    UI <-->|HTTP REST| API
-    GM_Panel <-->|HTTP REST| API
-    Canvas -.->|Konsumuje dane| UI
-    API <--> Neo4j_Driver
-    Neo4j_Driver <-->|Protokol Bolt - Port 7687| Neo4j
+    UI -->|HTTP REST| API
+    API -->|JSON| UI
+    
+    GM_Panel -->|HTTP REST| API
+    Canvas -.->|Konsumuje| UI
+    
+    API -->|Zapytania| Neo4j_Driver
+    Neo4j_Driver -->|Wyniki| API
+    
+    Neo4j_Driver -->|Protokol Bolt| Neo4j
+    Neo4j -->|Dane| Neo4j_Driver
 ```
 
 ### 3. Diagram Klas / Model Danych (Graph Schema Diagram)

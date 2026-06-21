@@ -195,6 +195,15 @@ function App() {
     }, 250);
   }, [data, isGMMode, linkingState, selectedNode]);
 
+  const handleNodeClickRef = useRef(handleNodeClick);
+  useEffect(() => {
+    handleNodeClickRef.current = handleNodeClick;
+  }, [handleNodeClick]);
+
+  const stableOnNodeClick = useCallback((node: Node) => {
+    handleNodeClickRef.current(node);
+  }, []);
+
   const handleFindPath = async () => {
     if (!pathSource || !pathTarget) return;
     try {
@@ -487,7 +496,7 @@ function App() {
           selectedNode={selectedNode}
           recommendedEquipment={recommendedEquipment}
           highlightsRef={highlightsRef}
-          onNodeClick={handleNodeClick}
+          onNodeClick={stableOnNodeClick}
           getNodeColor={getNodeColor}
           translateLabel={translateLabel}
           translateRelation={translateRelation}

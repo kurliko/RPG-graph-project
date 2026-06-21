@@ -27,7 +27,7 @@ export const Pathfinder: React.FC<PathfinderProps> = ({
     <>
       <hr style={{ borderColor: '#30363d', margin: '20px 0', width: '100%' }} />
       <div>
-        <h3 style={{ color: '#FFD700', margin: '0 0 10px 0' }}>Pathfinder</h3>
+        <h3 style={{ color: '#d4af37', textShadow: '0 2px 5px rgba(0,0,0,0.8)', margin: '0 0 10px 0' }}>Pathfinder</h3>
         
         <div style={{display: 'flex', gap: '10px', marginBottom: '15px'}}>
           <button 

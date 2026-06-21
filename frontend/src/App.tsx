@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import './index.css';
 
-// Types and APIs
+
 import type { Node, GraphData } from './types';
 import { api } from './services/api';
 
-// Utils
+
 import { translateLabel, translateRelation, translateDetailKey, getNodeColor } from './utils/graphUtils';
 
-// Components
+
 import { IconRefresh, IconTools, IconStart, IconTarget, IconSearch, IconSwords, IconShield } from './components/icons';
 import { SearchBar } from './components/SearchBar';
 import { GraphViewer, getSvgStrings } from './components/GraphViewer';

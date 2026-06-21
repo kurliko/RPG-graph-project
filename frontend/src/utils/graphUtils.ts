@@ -53,13 +53,13 @@ export const translateDetailKey = (key: string): string => {
 
 export const getNodeColor = (node: Node) => {
   switch (node.label) {
-    case 'Zone': return '#228B22'; // ForestGreen
-    case 'NPC': return '#4169E1'; // RoyalBlue
-    case 'Monster': return '#B22222'; // Firebrick
-    case 'Item': return '#DAA520'; // Goldenrod
-    case 'Material': return '#A9A9A9'; // DarkGray
-    case 'Quest': return '#9370DB'; // MediumPurple
-    case 'Skill': return '#FF1493'; // DeepPink
+    case 'Zone': return '#228B22'; 
+    case 'NPC': return '#4169E1'; 
+    case 'Monster': return '#B22222'; 
+    case 'Item': return '#DAA520'; 
+    case 'Material': return '#A9A9A9'; 
+    case 'Quest': return '#9370DB'; 
+    case 'Skill': return '#FF1493'; 
     case 'Element': return node.color || '#00FFFF';
     default: return '#FFFFFF';
   }

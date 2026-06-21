@@ -94,7 +94,7 @@ W głównym katalogu projektu wywołaj dostarczony skrypt:
 ```bash
 ./setup.sh
 ```
-Skrypt ten pełni rolę "dyrygenta" infrastruktury:
+Skrypt ten:
 1. Uruchamia komendę `docker compose up -d`, która stawia bazę, backend i frontend.
 2. Wchodzi w inteligentną pętlę i systematycznie przepytuje bazę za pomocą `cypher-shell` komendą `RETURN 1`, oczekując na to, aż silnik javy Neo4j w pełni się uruchomi.
 3. Po potwierdzeniu gotowości wywołuje jednorazowy skrypt `seed.py` na kontenerze backendu, który wypełnia pusty graf naszymi testowymi danymi (potwory, itemy, wikingowie).
@@ -102,7 +102,7 @@ Skrypt ten pełni rolę "dyrygenta" infrastruktury:
 ### Adresy Aplikacji:
 * **Frontend (Aplikacja RPG Graph):** [http://localhost:5173](http://localhost:5173)
 * **Backend API (Swagger Docs):** [http://localhost:8000/docs](http://localhost:8000/docs)
-* **Neo4j Browser (Baza Danych):** [http://localhost:7474](http://localhost:7474) (Logowanie wyłączone).
+* **Neo4j Browser (Baza Danych):** [http://localhost:7474](http://localhost:7474) (neo4j / rpg-password123)
 
 ---
 

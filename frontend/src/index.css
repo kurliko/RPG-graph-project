@@ -10,12 +10,12 @@ body {
   font-family: 'Iceberg', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #0b110d; /* Głęboka, mroczna leśna czerń */
-  color: #e8e4c9; /* Kolor pergaminu */
+  background-color: #0b110d; 
+  color: #e8e4c9; 
   overflow: hidden;
 }
 
-/* Custom Scrollbar */
+
 ::-webkit-scrollbar {
   width: 12px;
   height: 12px;
@@ -29,7 +29,7 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #2a3d32;
   border-radius: 6px;
-  border: 3px solid rgba(10, 15, 12, 0.9); /* Creates padding around thumb */
+  border: 3px solid rgba(10, 15, 12, 0.9); 
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -57,14 +57,14 @@ body {
 .brand {
   font-size: 1.5rem;
   font-weight: 900;
-  color: #a3c9a8; /* Zgaszona zieleń nordycka */
+  color: #a3c9a8; 
   display: flex;
   align-items: center;
   gap: 10px;
   text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
-/* Search Bar - Pływający na środku */
+
 .floating-search-container {
   position: absolute;
   top: 25px;
@@ -147,7 +147,7 @@ body {
   height: 100%;
 }
 
-/* Sidebar Styling - Glassmorphism */
+
 .sidebar {
   width: 360px;
   background-color: rgba(18, 28, 22, 0.92);
@@ -169,7 +169,7 @@ body {
 }
 
 .sidebar-content {
-  padding: 65px 20px 20px 20px; /* offset for header */
+  padding: 65px 20px 20px 20px; 
   display: flex;
   flex-direction: column;
   color: #e8e4c9;
@@ -197,7 +197,7 @@ body {
   font-family: 'Iceberg', sans-serif;
 }
 
-/* Stat Block Styling */
+
 .details-list {
   background-color: rgba(10, 15, 12, 0.6);
   border: 1px solid #2a3d32;
@@ -272,7 +272,6 @@ body {
   border-color: #d4af37;
 }
 
-/* Style dla wstrzykiwanych surowych ikon SVG */
 .rpg-icon svg {
   width: 100%;
   height: 100%;
@@ -358,7 +357,7 @@ body {
   color: #58a6ff;
 }
 
-/* GM Mode Styles */
+
 .gm-toggle-container {
   position: absolute;
   top: 25px;

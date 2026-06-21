@@ -31,6 +31,5 @@ def extract_links(results, link_records_index='r', source_idx=0, target_idx=1):
                 **dict(r.items())
             })
             
-    # Zabezpieczenie przed dublami
     unique_links = {f"{l['source']}-{l['type']}-{l['target']}": l for l in links}
     return list(unique_links.values())

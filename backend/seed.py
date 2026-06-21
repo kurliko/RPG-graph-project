@@ -7,17 +7,17 @@ def run_seed():
     with open('seed_data.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    # Wyczyść bazę
+    
     db.query("MATCH (n) DETACH DELETE n")
     print("Poprzednia baza danych została wyczyszczona.")
 
-    # Tworzenie węzłów
+    
     for node in data['nodes']:
         node_id = node.pop('id')
         label = node.pop('type')
-        node['game_id'] = node_id # Zapisz oryginalne ID
+        node['game_id'] = node_id
         
-        # Budowanie właściwości (zabezpieczenie przed atakami Injection chociaż tu ufamy danym)
+        
         props = ", ".join([f"{k}: ${k}" for k in node.keys()])
         query = f"CREATE (n:{label} {{ {props} }})"
         
@@ -25,7 +25,7 @@ def run_seed():
 
     print(f"Dodano {len(data['nodes'])} węzłów.")
 
-    # Tworzenie relacji
+    
     for link in data['links']:
         source_id = link.pop('source')
         target_id = link.pop('target')

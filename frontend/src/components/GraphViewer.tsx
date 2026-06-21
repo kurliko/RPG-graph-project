@@ -90,14 +90,14 @@ export const GraphViewer = forwardRef<any, GraphViewerProps>(({
           const highlight = highlightsRef.current.find(h => h.id === node.id);
           const size = 6;
           
-          // Glow animation for newly added nodes
+          
           if (highlight) {
             const elapsed = Date.now() - highlight.timestamp;
-            const duration = 2500; // Glow lasts 2.5 seconds
+            const duration = 2500; 
             if (elapsed < duration) {
               const progress = elapsed / duration;
-              const alpha = 0.8 * (1 - progress); // Fades smoothly from 0.8 to 0
-              const glowSize = size + 15 * (1 - progress); // Pulses inward
+              const alpha = 0.8 * (1 - progress); 
+              const glowSize = size + 15 * (1 - progress); 
               ctx.beginPath();
               ctx.arc(node.x, node.y, glowSize, 0, 2 * Math.PI, false);
               ctx.fillStyle = `rgba(0, 255, 255, ${alpha})`;
@@ -117,12 +117,12 @@ export const GraphViewer = forwardRef<any, GraphViewerProps>(({
           if (isRecommended) {
             ctx.beginPath();
             ctx.arc(node.x, node.y, size + 8, 0, 2 * Math.PI, false);
-            ctx.strokeStyle = '#D4AF37'; // Nordic gold
+            ctx.strokeStyle = '#D4AF37'; 
             ctx.lineWidth = 1.5;
             ctx.stroke();
             
-            // Glow
-            ctx.shadowColor = '#FF4500'; // Fiery red
+            
+            ctx.shadowColor = '#FF4500'; 
             ctx.shadowBlur = 15;
           }
 
@@ -132,13 +132,13 @@ export const GraphViewer = forwardRef<any, GraphViewerProps>(({
           ctx.fillStyle = getNodeColor(node as Node);
           ctx.fill();
           
-          // Reset shadowBlur after drawing node background so SVG icon isn't blurry
+          
           ctx.shadowBlur = 0;
 
           // Draw SVG icon
           const img = ICONS[(node as Node).label];
           if (img) {
-            const imgSize = size * 1.3; // Icon sized to match the circle
+            const imgSize = size * 1.3; 
             ctx.drawImage(img, node.x - imgSize/2, node.y - imgSize/2, imgSize, imgSize);
           }
         }}

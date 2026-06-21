@@ -211,6 +211,7 @@ flowchart LR
     Item -->|REQUIRES| Material
     Item -->|IMBUED_WITH| Element
     Quest -->|TARGETS| Monster
+    Quest -->|TAKES_PLACE_IN| Zone
     NPC -->|GIVES| Quest
     NPC -->|LOCATED_IN| Zone
     Skill -->|LEARNED_FROM| Monster

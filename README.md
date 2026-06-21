@@ -117,3 +117,112 @@ RPG-graph-project/
 └── frontend/                # Interfejs Użytkownika (React, Vite, TS)
     └── src/components/      # UI podzielone na interaktywne moduły
 ```
+
+---
+
+##  Diagramy UML
+
+Poniższe diagramy formalizują architekturę aplikacji oraz zamodelowany schemat bazy grafowej, spełniając klasyczne założenia inżynierii oprogramowania. (Diagramy są renderowane automatycznie przy użyciu składni **Mermaid**).
+
+### 1. Diagram Przypadków Użycia (Use Case)
+
+Prezentuje zakres możliwości dla poszczególnych aktorów w systemie.
+
+```mermaid
+flowchart LR
+    %% Aktorzy
+    Gracz["👤 Gracz (Eksplorator)"]
+    GM["🧙‍♂️ Game Master"]
+
+    %% Przypadki uzycia
+    UC1("Wyszukiwanie Węzłów")
+    UC2("Eksploracja Grafu (Rozwijanie na kliknięcie)")
+    UC3("Wyznaczanie Najkrótszej Ścieżki (Pathfinder)")
+    UC4("Tworzenie Nowych Węzłów i Relacji")
+    UC5("Edycja Istniejących Węzłów")
+    UC6("Usuwanie Węzłów / Relacji")
+
+    %% Relacje
+    Gracz --> UC1
+    Gracz --> UC2
+    Gracz --> UC3
+    
+    GM -- "Dziedziczy uprawnienia gracza" --> Gracz
+    GM --> UC4
+    GM --> UC5
+    GM --> UC6
+```
+
+### 2. Diagram Komponentów (Component Diagram)
+
+Obrazuje przepływ danych pomiędzy niezależnymi warstwami aplikacji (Front, Back, DB).
+
+```mermaid
+flowchart TD
+    %% Komponenty
+    subgraph Frontend["Frontend (React + Vite)"]
+        UI("Interfejs Użytkownika")
+        GM_Panel("Panel Game Mastera")
+        Canvas("Silnik Renderowania Grafu (Force-Graph)")
+    end
+
+    subgraph Backend["Backend API (FastAPI / Python)"]
+        API("REST API (Routers)")
+        Neo4j_Driver("Neo4j Python Driver")
+    end
+
+    subgraph Database["Baza Danych (Docker)"]
+        Neo4j[("Neo4j Graph Database\n(wtyczka APOC)")]
+    end
+
+    %% Połączenia
+    UI <-->|HTTP/REST| API
+    GM_Panel <-->|HTTP/REST| API
+    Canvas -.->|Konsumuje dane| UI
+    API <--> Neo4j_Driver
+    Neo4j_Driver <-->|Protokół Bolt (Port 7687)| Neo4j
+```
+
+### 3. Diagram Klas / Model Danych (Graph Schema Diagram)
+
+Mimo braku klasycznego schematu w neo4j, poniższy diagram klas UML odzwierciedla relacje między typami (Etykietami) węzłów.
+
+```mermaid
+classDiagram
+    class Monster {
+        +String name
+        +String details
+    }
+    class Material {
+        +String name
+        +String details
+    }
+    class Item {
+        +String name
+        +String details
+    }
+    class NPC {
+        +String name
+        +String details
+    }
+    class Quest {
+        +String name
+        +String details
+    }
+    class Skill {
+        +String name
+        +String details
+    }
+    class Zone {
+        +String name
+        +String details
+    }
+
+    Monster --> Material : DROPS
+    Monster --> Monster : WEAK_AGAINST
+    Item --> Material : REQUIRES
+    Quest --> Monster : TARGETS
+    NPC --> Quest : GIVES
+    NPC --> Zone : LOCATED_IN
+    Skill --> Monster : LEARNED_FROM
+```

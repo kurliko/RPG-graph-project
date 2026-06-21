@@ -6,12 +6,12 @@ Projekt z przedmiotu Bazy Danych zrealizowany w oparciu o silnik grafowy (Neo4j)
 
 ---
 
-##  Główne Funkcjonalności i Uzasadnienie Akademickie
+##  Główne Funkcjonalności
 
 Aplikacja łączy w sobie potężny silnik grafowy ze stylizowanym interfejsem graficznym, oferując narzędzia zarówno dla graczy (eksploracja), jak i twórców gry (Game Master Mode). Wybór bazy Neo4j nie był przypadkowy – dla poniższych funkcjonalności podejście relacyjne wymagałoby skomplikowanych złączeń (JOIN) oraz trudnych w utrzymaniu, powolnych zapytań hierarchicznych (np. za pomocą CTE w SQL).
 
 ### 1. Eksploracja i Pobieranie Połączeń (Expand Node)
-Zamiast pobierania danych ze złączeń wielu tabel (Item, Monster, NPC, Quest, itp.), co stanowi "koszmar łączenia" w tradycyjnym SQL, Neo4j natywnie wspiera przechodzenie po grafie. Użytkownik podwójnie klikając na węzeł, natychmiastowo doczytuje tylko jego bezpośrednich sąsiadów, zapobiegając przeładowaniu przeglądarki i zachowując stały czas zapytania ($O(1)$) bez względu na całkowity rozmiar grafu.
+Zamiast pobierania danych ze złączeń wielu tabel (Item, Monster, NPC, Quest, itp.), co jest powolne w tradycyjnym SQL, Neo4j natywnie wspiera przechodzenie po grafie. Użytkownik podwójnie klikając na węzeł, natychmiastowo doczytuje tylko jego bezpośrednich sąsiadów, zapobiegając przeładowaniu przeglądarki i zachowując stały czas zapytania ($O(1)$) bez względu na całkowity rozmiar grafu.
 
 **Wykorzystywane zapytanie Cypher:**
 ```cypher
@@ -48,7 +48,7 @@ RETURN
 ```
 
 ### 4. Game Master Mode (Interaktywny CRUD na Grafie)
-Dodawanie nowych powiązań między różnymi typami bytów (np. Potwór -> Słabość) w bazie relacyjnej pociąga za sobą konieczność tworzenia wielu tabel asocjacyjnych. Grafowe podejście (Property Graph Model) pozwala na utworzenie dowolnej krawędzi (relacji) ze swoimi własnymi właściwościami (np. szansa wypadnięcia) bez uprzedniego modelowania skomplikowanego schematu bazy, co stanowi gigantyczną zaletę elastyczności grafu.
+Dodawanie nowych powiązań między różnymi typami bytów (np. Potwór -> Słabość) w bazie relacyjnej pociąga za sobą konieczność tworzenia wielu tabel asocjacyjnych. Grafowe podejście pozwala na utworzenie dowolnej krawędzi (relacji) ze swoimi własnymi właściwościami (np. szansa wypadnięcia) bez uprzedniego modelowania skomplikowanego schematu bazy, co stanowi gigantyczną zaletę elastyczności grafu.
 
 **Tworzenie dynamicznych relacji w locie:**
 ```cypher

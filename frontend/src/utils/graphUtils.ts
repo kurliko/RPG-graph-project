@@ -56,7 +56,7 @@ export const getNodeColor = (node: Node) => {
     case 'Zone': return '#228B22'; // ForestGreen
     case 'NPC': return '#4169E1'; // RoyalBlue
     case 'Monster': return '#B22222'; // Firebrick
-    case 'Item': return '#FFD700'; // Gold
+    case 'Item': return '#DAA520'; // Goldenrod
     case 'Material': return '#A9A9A9'; // DarkGray
     case 'Quest': return '#9370DB'; // MediumPurple
     case 'Skill': return '#FF1493'; // DeepPink

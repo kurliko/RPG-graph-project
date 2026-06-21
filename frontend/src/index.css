@@ -287,15 +287,16 @@ body {
 }
 
 .close-btn {
-  background-color: rgba(255, 69, 0, 0.05);
-  color: #ff4500;
-  border: 1px solid rgba(255, 69, 0, 0.3);
+  background-color: #2b1111;
+  color: #a53232;
+  border: 1px solid #a53232;
 }
 
 .close-btn:hover {
-  background-color: rgba(255, 69, 0, 0.15);
-  color: #ff7333;
-  border-color: #ff7333;
+  background-color: #401818;
+  color: #ffb3b3;
+  border-color: #c94040;
+  box-shadow: 0 0 10px rgba(165, 50, 50, 0.3);
 }
 
 .sidebar-empty {

@@ -131,13 +131,14 @@ Prezentuje zakres możliwości dla poszczególnych aktorów w systemie.
 ```mermaid
 flowchart LR
     %% Aktorzy
-    Gracz["👤 Gracz (Eksplorator)"]
-    GM["🧙‍♂️ Game Master"]
+    Gracz["Gracz (Eksplorator)"]
+    GM["Game Master"]
 
     %% Przypadki uzycia
     UC1("Wyszukiwanie Węzłów")
     UC2("Eksploracja Grafu (Rozwijanie na kliknięcie)")
     UC3("Wyznaczanie Najkrótszej Ścieżki (Pathfinder)")
+    UC7("Analiza Złożonych Zależności (Crafting, Odporności)")
     UC4("Tworzenie Nowych Węzłów i Relacji")
     UC5("Edycja Istniejących Węzłów")
     UC6("Usuwanie Węzłów / Relacji")
@@ -146,6 +147,7 @@ flowchart LR
     Gracz --> UC1
     Gracz --> UC2
     Gracz --> UC3
+    Gracz --> UC7
     
     GM -- "Dziedziczy uprawnienia gracza" --> Gracz
     GM --> UC4
@@ -161,14 +163,19 @@ Obrazuje przepływ danych pomiędzy niezależnymi warstwami aplikacji (Front, Ba
 flowchart TD
     %% Komponenty
     subgraph Frontend["Frontend (React + Vite)"]
-        UI("Interfejs Użytkownika")
+        direction TB
         GM_Panel("Panel Game Mastera")
+        UI("Interfejs Użytkownika")
         Canvas("Silnik Renderowania Grafu (Force-Graph)")
+        GM_Panel ~~~ UI
+        UI ~~~ Canvas
     end
 
     subgraph Backend["Backend API (FastAPI / Python)"]
+        direction TB
         API("REST API (Routers)")
         Neo4j_Driver("Neo4j Python Driver")
+        API ~~~ Neo4j_Driver
     end
 
     subgraph Database["Baza Danych (Docker)"]
@@ -176,15 +183,11 @@ flowchart TD
     end
 
     %% Połączenia
-    UI -->|HTTP REST| API
-    API -->|JSON| UI
-    
-    GM_Panel -->|HTTP REST| API
+    UI -->|HTTP / JSON| API
+    GM_Panel -->|HTTP / JSON| API
     UI -.->|Wizualizuje w| Canvas
     
     API -->|Zapytania| Neo4j_Driver
-    Neo4j_Driver -->|Wyniki| API
-    
     Neo4j_Driver -->|Protokol Bolt| Neo4j
     Neo4j -->|Dane| Neo4j_Driver
 ```

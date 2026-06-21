@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Iceberg&display=swap');
+
 * {
   box-sizing: border-box;
 }
@@ -5,7 +7,7 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Cinzel Decorative', serif;
+  font-family: 'Iceberg', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #0b110d; /* Głęboka, mroczna leśna czerń */

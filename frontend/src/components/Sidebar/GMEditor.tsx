@@ -36,7 +36,7 @@ export const GMEditor: React.FC<GMEditorProps> = ({
       </h2>
       
       {linkingState.active && (
-        <div style={{ padding: '10px', background: 'rgba(255, 69, 0, 0.2)', border: '1px dashed #ff4500', marginBottom: '15px', color: '#fff', borderRadius: '4px' }}>
+        <div style={{ padding: '10px', background: 'rgba(92, 107, 192, 0.2)', border: '1px dashed #5c6bc0', marginBottom: '15px', color: '#fff', borderRadius: '4px' }}>
           <strong>Linking Mode Active</strong>
           {!linkingState.targetNode ? (
             <>

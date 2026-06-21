@@ -144,4 +144,9 @@ vite.config.ts.timestamp-*
 
 # Ignoruj pliki bazy danych Neo4j
 neo4j/data/
-neo4j/logs/
+neo4j/logs/.agents/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class

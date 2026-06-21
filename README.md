@@ -180,7 +180,7 @@ flowchart TD
     API -->|JSON| UI
     
     GM_Panel -->|HTTP REST| API
-    Canvas -.->|Konsumuje| UI
+    UI -.->|Wizualizuje w| Canvas
     
     API -->|Zapytania| Neo4j_Driver
     Neo4j_Driver -->|Wyniki| API
@@ -210,7 +210,7 @@ flowchart LR
     Monster -->|WEAK_AGAINST| Element
     Item -->|REQUIRES| Material
     Item -->|IMBUED_WITH| Element
-    Quest --->|TARGETS| Monster
+    Quest -->|TARGETS| Monster
     Quest -->|TAKES_PLACE_IN| Zone
     NPC -->|GIVES| Quest
     NPC -->|LOCATED_IN| Zone

@@ -8,8 +8,9 @@ interface GMEditorProps {
   setNodeFormData: (data: any) => void;
   newNodeLabel: string;
   setNewNodeLabel: (label: string) => void;
-  linkingState: { active: boolean, targetLabel: string };
-  setLinkingState: (state: { active: boolean, targetLabel: string }) => void;
+  linkingState: { active: boolean, targetNode: Node | null, targetLabel: string };
+  setLinkingState: (state: any) => void;
+  onConfirmLink: () => void;
   onCreateNode: () => void;
   onUpdateNode: () => void;
   onDeleteNode: () => void;
@@ -23,6 +24,7 @@ export const GMEditor: React.FC<GMEditorProps> = ({
   setNewNodeLabel,
   linkingState,
   setLinkingState,
+  onConfirmLink,
   onCreateNode,
   onUpdateNode,
   onDeleteNode
@@ -36,8 +38,19 @@ export const GMEditor: React.FC<GMEditorProps> = ({
       {linkingState.active && (
         <div style={{ padding: '10px', background: 'rgba(255, 69, 0, 0.2)', border: '1px dashed #ff4500', marginBottom: '15px', color: '#fff', borderRadius: '4px' }}>
           <strong>Linking Mode Active</strong>
-          <p style={{fontSize: '0.8rem', margin: '5px 0'}}>Click another node in the graph to create a connection.</p>
-          <button className="gm-btn" onClick={() => setLinkingState({active: false, targetLabel: ""})}>Cancel</button>
+          {!linkingState.targetNode ? (
+            <>
+              <p style={{fontSize: '0.8rem', margin: '5px 0'}}>Click another node in the graph to create a connection.</p>
+              <button className="gm-btn" onClick={() => setLinkingState({active: false, targetNode: null, targetLabel: ""})}>Cancel</button>
+            </>
+          ) : (
+            <>
+              <p style={{fontSize: '0.8rem', margin: '5px 0'}}>Target: {linkingState.targetNode.name || linkingState.targetNode.title || linkingState.targetNode.game_id || 'Unknown'}</p>
+              <input className="gm-input" value={linkingState.targetLabel} onChange={e => setLinkingState({...linkingState, targetLabel: e.target.value.toUpperCase()})} placeholder="RELATION_TYPE (e.g. DROPS)" />
+              <button className="gm-btn primary" onClick={onConfirmLink}>Confirm Link</button>
+              <button className="gm-btn" onClick={() => setLinkingState({active: false, targetNode: null, targetLabel: ""})}>Cancel</button>
+            </>
+          )}
         </div>
       )}
       
@@ -48,7 +61,7 @@ export const GMEditor: React.FC<GMEditorProps> = ({
           <textarea className="gm-input" value={nodeFormData.details || ''} onChange={e => setNodeFormData({...nodeFormData, details: e.target.value})} placeholder="Details" rows={4} />
           
           <button className="gm-btn primary" onClick={onUpdateNode}>Save Changes</button>
-          <button className="gm-btn secondary" onClick={() => setLinkingState({ active: true, targetLabel: "NEW_LINK" })}>Link to...</button>
+          <button className="gm-btn secondary" onClick={() => setLinkingState({ active: true, targetNode: null, targetLabel: "NEW_LINK" })}>Link to...</button>
           <button className="gm-btn danger" onClick={onDeleteNode}>Delete Node</button>
         </div>
       ) : (

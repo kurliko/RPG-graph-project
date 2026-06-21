@@ -44,7 +44,24 @@ function App() {
 
   // GM Mode State
   const [isGMMode, setIsGMMode] = useState<boolean>(false);
-  const [linkingState, setLinkingState] = useState<{ active: boolean, targetLabel: string }>({ active: false, targetLabel: "" });
+  const [linkingState, setLinkingState] = useState<{ active: boolean, targetNode: Node | null, targetLabel: string }>({ active: false, targetNode: null, targetLabel: "" });
+
+  const handleConfirmLink = async () => {
+    if (isGMMode && linkingState.active && selectedNode && linkingState.targetNode) {
+      try {
+        const typeStr = linkingState.targetLabel || 'NEW_LINK';
+        await api.createLink(selectedNode.id as string, linkingState.targetNode.id as string, typeStr, {});
+        setData(prev => ({
+          ...prev,
+          links: [...prev.links, { source: selectedNode.id, target: linkingState.targetNode?.id, type: typeStr }]
+        }));
+        setLinkingState({ active: false, targetNode: null, targetLabel: "" });
+      } catch (e) {
+        console.error(e);
+        alert("Failed to create link.");
+      }
+    }
+  };
   const [nodeFormData, setNodeFormData] = useState<any>({});
   const [newNodeLabel, setNewNodeLabel] = useState<string>("Monster");
   
@@ -163,16 +180,8 @@ function App() {
 
   const handleNodeClick = useCallback(async (node: Node) => {
     if (isGMMode && linkingState.active && selectedNode) {
-      try {
-        await api.createLink(selectedNode.id as string, node.id as string, linkingState.targetLabel || 'RELATES_TO', {});
-        setData(prev => ({
-          ...prev,
-          links: [...prev.links, { source: selectedNode.id, target: node.id, type: linkingState.targetLabel || 'RELATES_TO' }]
-        }));
-        setLinkingState({ active: false, targetLabel: "" });
-      } catch (e) {
-        console.error(e);
-        alert("Failed to create link.");
+      if (!linkingState.targetNode) {
+        setLinkingState(prev => ({ ...prev, targetNode: node, targetLabel: "NEW_LINK" }));
       }
       return;
     }
@@ -516,6 +525,7 @@ function App() {
               setNewNodeLabel={setNewNodeLabel}
               linkingState={linkingState}
               setLinkingState={setLinkingState}
+              onConfirmLink={handleConfirmLink}
               onCreateNode={handleCreateNode}
               onUpdateNode={handleUpdateNode}
               onDeleteNode={handleDeleteNode}
